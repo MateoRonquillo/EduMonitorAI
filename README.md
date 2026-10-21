@@ -20,3 +20,5 @@ Este repositorio contiene la estructura y las convenciones iniciales. Aún no ha
 Antes de implementar, se deben elegir las versiones de .NET y del frontend, los mecanismos de autenticación y la persistencia. Después se podrán crear los proyectos y registrarlos en la solución.
 
 Consulta [la guía de arquitectura](docs/architecture/README.md) y [las pautas de contribución](CONTRIBUTING.md).
+
+La [guía de GitFlow](docs/gitflow.md) define las ramas, los commits, las revisiones y la trazabilidad de entregas del equipo.
