@@ -16,4 +16,4 @@ Sigue la [estrategia de ramas y convenciones de commits](docs/gitflow.md) para c
 - Evita dependencias directas entre implementaciones internas de distintos servicios.
 - Respeta `.editorconfig` y los formateadores del stack cuando se configuren.
 
-Todavía no se han definido comandos de compilación, ejecución ni pruebas: se documentarán al crear los proyectos.
+Los comandos de compilación, ejecución y pruebas están en el [README del backend](backend/README.md). Para cambios en los endpoints técnicos, ejecuta `dotnet test backend/EduMonitorAI.sln --configuration Release`: las pruebas comprueban el arranque de los tres hosts, `/health` y la disponibilidad de OpenAPI según el entorno. Cuando cambies perfiles de ejecución o configuración de red, verifica también el arranque local con los comandos documentados.

@@ -2,7 +2,7 @@
 
 ## Organización propuesta
 
-La estructura prepara tres servicios con responsabilidades separadas. La separación de carpetas no implica que ya existan servicios ejecutables o despliegues independientes.
+La solución contiene tres hosts ASP.NET Core con responsabilidades separadas, un endpoint técnico `/health` en cada uno y documentación OpenAPI habilitada solo en desarrollo. La lógica de negocio sigue pendiente; estos puntos de entrada no comprometen un despliegue independiente por servicio. Consulta la [inicialización del backend](../../backend/README.md) y los [contratos técnicos](../api/README.md).
 
 | Servicio | Responsabilidad prevista |
 | --- | --- |
@@ -35,4 +35,4 @@ Las dependencias deben apuntar hacia el dominio y la aplicación. Los detalles d
 
 ## Decisiones pendientes
 
-Versiones y framework del frontend, versión de .NET, persistencia, identidad, comunicación entre servicios y estrategia de despliegue. Registrar las decisiones aceptadas en `decisions/` antes de introducir componentes que dependan de ellas.
+Se adoptó .NET 10 para los hosts en la [decisión 0001](decisions/0001-inicializacion-aspnet-core.md). Siguen pendientes versiones y framework del frontend, persistencia, identidad, comunicación entre servicios y estrategia de despliegue. Registrar las decisiones aceptadas en `decisions/` antes de introducir componentes que dependan de ellas.

@@ -6,7 +6,7 @@ Proyecto académico de MVP para cuatro integrantes y seis semanas, basado en `Pr
 
 ## Estado del repositorio
 
-Actualmente existen la estructura de carpetas, una solución .NET vacía, documentación y archivos comunes de configuración. Todavía no hay proyectos ejecutables, dependencias instalables, persistencia, integración con Moodle, agente, contenedores, pruebas ejecutables ni flujos de CI configurados.
+Actualmente existen la estructura de carpetas, documentación, archivos comunes y una solución con tres hosts ASP.NET Core sobre .NET 10 y pruebas automatizadas de arranque. Cada host expone `GET /health` como comprobación de vida y el documento OpenAPI en `GET /openapi/v1.json` solo en desarrollo. Todavía no hay funcionalidad académica, autenticación, persistencia, integración con Moodle, agente, contenedores ni flujos de CI configurados.
 
 Los archivos `.gitkeep` permiten conservar las carpetas vacías en Git. Las variables de [infra/.env.example](infra/.env.example) son propuestas y aún no son consumidas por una aplicación.
 
@@ -46,6 +46,7 @@ EduMonitorAI/
 │       ├── components/
 │       └── services/
 ├── backend/
+│   ├── README.md
 │   ├── EduMonitorAI.sln
 │   ├── src/
 │   │   ├── BuildingBlocks/
@@ -70,6 +71,7 @@ EduMonitorAI/
 ├── .github/workflows/
 ├── .editorconfig
 ├── .gitignore
+├── global.json
 ├── README.md
 └── CONTRIBUTING.md
 ```
@@ -85,7 +87,7 @@ EduMonitorAI/
 | `backend/src/Services/Access.API/` | Autenticación y autorización por rol y curso. |
 | `backend/src/BuildingBlocks/` | Utilidades técnicas compartidas mínimas, sin centralizar reglas de negocio. |
 | `backend/tests/UnitTests/` | Pruebas futuras de indicadores y reglas de negocio. |
-| `backend/tests/IntegrationTests/` | Pruebas futuras de API, integración Moodle y permisos. |
+| `backend/tests/IntegrationTests/` | Pruebas de arranque, health checks y OpenAPI por entorno; integración Moodle y permisos pendientes. |
 | `docs/architecture/` | Diseño y registro de decisiones técnicas. |
 | `docs/api/` | Contratos y documentación de endpoints. |
 | `docs/requirements/` | Requisitos y futura matriz de cumplimiento RF/RNF. |
@@ -93,7 +95,7 @@ EduMonitorAI/
 | `infra/` | Configuración de ejemplo y futuros recursos Docker y Compose. |
 | `.github/workflows/` | Ubicación reservada para integración continua. |
 
-La solución `backend/EduMonitorAI.sln` aún no contiene proyectos. Los nombres `.API` identifican límites de responsabilidad previstos, no endpoints disponibles. El servicio de agente y su ubicación dentro del repositorio están pendientes de una decisión documentada; no existe todavía una carpeta ni una implementación para ese componente.
+La solución `backend/EduMonitorAI.sln` contiene los tres proyectos `.API`, cada uno con `Program.cs`, configuración de logs y un perfil de ejecución local. Están disponibles `/health` y OpenAPI en desarrollo; las responsabilidades de negocio de la tabla siguen pendientes. El servicio de agente y su ubicación dentro del repositorio están pendientes de una decisión documentada; no existe todavía una carpeta ni una implementación para ese componente.
 
 ## Arquitectura de referencia
 
@@ -101,7 +103,7 @@ La especificación sugiere React para el frontend, ASP.NET Core Web API para el 
 
 El frontend consumirá el backend; este controlará la autorización y el acceso a datos y a Moodle. El agente invocará herramientas controladas del backend y no accederá directamente a credenciales ni a tablas sin controles. La separación entre API, aplicación, dominio e infraestructura se desarrollará conforme se creen los proyectos, según la [guía de arquitectura](docs/architecture/README.md).
 
-Las versiones, la distribución de proyectos, la ubicación del agente, el mecanismo de identidad y el despliegue se registrarán en [decisiones de arquitectura](docs/architecture/decisions/README.md) antes de introducir las dependencias correspondientes.
+La elección de .NET 10 y los hosts mínimos se registra en la [decisión 0001](docs/architecture/decisions/0001-inicializacion-aspnet-core.md). Las demás versiones, la distribución de capas, la ubicación del agente, el mecanismo de identidad y el despliegue se registrarán en [decisiones de arquitectura](docs/architecture/decisions/README.md) antes de introducir las dependencias correspondientes.
 
 ## Seguridad y calidad esperadas
 
@@ -114,7 +116,22 @@ Antes de conectar Moodle se deberán verificar versión, servicios habilitados, 
 
 ## Instalación y validación
 
-Esta etapa permite revisar la estructura y la documentación; aún no hay comandos de instalación, ejecución o pruebas de aplicación. No se requiere configurar tokens reales para trabajar en este alcance documental.
+Instala el SDK .NET 10 estable y, desde la raíz, restaura y compila la solución:
+
+```bash
+dotnet restore backend/EduMonitorAI.sln
+dotnet build backend/EduMonitorAI.sln --no-restore
+```
+
+El [README del backend](backend/README.md) detalla la ejecución de los tres hosts y la verificación de `/health` en los puertos locales 5101, 5102 y 5103. No se requieren tokens, Moodle ni base de datos para este arranque. El frontend sigue sin implementar.
+
+Para ejecutar las 18 pruebas automatizadas de arranque de los tres servicios:
+
+```bash
+dotnet test backend/EduMonitorAI.sln --configuration Release
+```
+
+Las pruebas utilizan hosts HTTP en memoria y validan `/health` y OpenAPI en Development, Production y Staging. No sustituyen las futuras pruebas de indicadores, permisos o integración con Moodle.
 
 Al implementar los componentes, este README deberá incorporar versiones y prerrequisitos, instalación, configuración sin secretos, ejecución local, pruebas y despliegue reproducibles. La aceptación del MVP deberá demostrar acceso restringido por curso, datos concordantes con Moodle, estados académicos diferenciados, alertas con evidencia y tres solicitudes del agente mediante herramientas reales, incluyendo el manejo de fallos sin inventar información.
 
@@ -123,6 +140,8 @@ La entrega final también deberá incluir diagrama de arquitectura, esquema de d
 ## Documentación y contribuciones
 
 - [Frontend](frontend/README.md).
+- [Backend: compilación, ejecución y comprobaciones](backend/README.md).
+- [Endpoints técnicos y OpenAPI local](docs/api/README.md).
 - [Arquitectura](docs/architecture/README.md) y [decisiones técnicas](docs/architecture/decisions/README.md).
 - [Estrategia de ramas y convenciones de commits](docs/gitflow.md).
 - [Pautas de contribución](CONTRIBUTING.md).
