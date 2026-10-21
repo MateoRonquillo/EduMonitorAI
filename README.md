@@ -4,7 +4,7 @@ Base de organización para una plataforma de seguimiento académico con integrac
 
 ## Estructura
 
-- `frontend/src/`: aplicación cliente; `app` contiene la configuración y composición, `pages` las vistas, `components` los elementos reutilizables y `services` los clientes de API.
+- `frontend/src/`: aplicación cliente; `app` contiene la configuración y composición, `pages` las vistas, `components` los elementos reutilizables y `services` los clientes de API. Consulta el [README del frontend](frontend/README.md).
 - `backend/EduMonitorAI.sln`: solución .NET inicial, todavía sin proyectos.
 - `backend/src/Services/`: servicios de integración con Moodle, datos académicos y acceso.
 - `backend/src/BuildingBlocks/`: componentes técnicos compartidos mínimos, sin reglas de negocio de los servicios.
