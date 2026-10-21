@@ -6,7 +6,7 @@ Proyecto académico de MVP para cuatro integrantes y seis semanas, basado en `Pr
 
 ## Estado del repositorio
 
-Actualmente existen la estructura de carpetas, documentación, archivos comunes y una solución con tres hosts ASP.NET Core sobre .NET 10. Cada host expone `GET /health` como comprobación de vida y el documento OpenAPI en `GET /openapi/v1.json` solo en desarrollo. Todavía no hay funcionalidad académica, autenticación, persistencia, integración con Moodle, agente, contenedores, pruebas automatizadas ni flujos de CI configurados.
+Actualmente existen la estructura de carpetas, documentación, archivos comunes y una solución con tres hosts ASP.NET Core sobre .NET 10 y pruebas automatizadas de arranque. Cada host expone `GET /health` como comprobación de vida y el documento OpenAPI en `GET /openapi/v1.json` solo en desarrollo. Todavía no hay funcionalidad académica, autenticación, persistencia, integración con Moodle, agente, contenedores ni flujos de CI configurados.
 
 Los archivos `.gitkeep` permiten conservar las carpetas vacías en Git. Las variables de [infra/.env.example](infra/.env.example) son propuestas y aún no son consumidas por una aplicación.
 
@@ -87,7 +87,7 @@ EduMonitorAI/
 | `backend/src/Services/Access.API/` | Autenticación y autorización por rol y curso. |
 | `backend/src/BuildingBlocks/` | Utilidades técnicas compartidas mínimas, sin centralizar reglas de negocio. |
 | `backend/tests/UnitTests/` | Pruebas futuras de indicadores y reglas de negocio. |
-| `backend/tests/IntegrationTests/` | Pruebas futuras de API, integración Moodle y permisos. |
+| `backend/tests/IntegrationTests/` | Pruebas de arranque, health checks y OpenAPI por entorno; integración Moodle y permisos pendientes. |
 | `docs/architecture/` | Diseño y registro de decisiones técnicas. |
 | `docs/api/` | Contratos y documentación de endpoints. |
 | `docs/requirements/` | Requisitos y futura matriz de cumplimiento RF/RNF. |
@@ -123,7 +123,15 @@ dotnet restore backend/EduMonitorAI.sln
 dotnet build backend/EduMonitorAI.sln --no-restore
 ```
 
-El [README del backend](backend/README.md) detalla la ejecución de los tres hosts y la verificación de `/health` en los puertos locales 5101, 5102 y 5103. No se requieren tokens, Moodle ni base de datos para este arranque. El frontend y las pruebas automatizadas siguen sin implementar.
+El [README del backend](backend/README.md) detalla la ejecución de los tres hosts y la verificación de `/health` en los puertos locales 5101, 5102 y 5103. No se requieren tokens, Moodle ni base de datos para este arranque. El frontend sigue sin implementar.
+
+Para ejecutar las 18 pruebas automatizadas de arranque de los tres servicios:
+
+```bash
+dotnet test backend/EduMonitorAI.sln --configuration Release
+```
+
+Las pruebas utilizan hosts HTTP en memoria y validan `/health` y OpenAPI en Development, Production y Staging. No sustituyen las futuras pruebas de indicadores, permisos o integración con Moodle.
 
 Al implementar los componentes, este README deberá incorporar versiones y prerrequisitos, instalación, configuración sin secretos, ejecución local, pruebas y despliegue reproducibles. La aceptación del MVP deberá demostrar acceso restringido por curso, datos concordantes con Moodle, estados académicos diferenciados, alertas con evidencia y tres solicitudes del agente mediante herramientas reales, incluyendo el manejo de fallos sin inventar información.
 

@@ -28,3 +28,5 @@ app.MapGet("/health", async (HealthCheckService healthChecks, CancellationToken 
     .Produces<string>(StatusCodes.Status503ServiceUnavailable, "text/plain");
 
 app.Run();
+
+public partial class Program { }

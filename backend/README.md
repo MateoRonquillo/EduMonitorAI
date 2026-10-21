@@ -78,8 +78,32 @@ Se esperan HTTP 200 y `Healthy` para `/health`, y HTTP 404 para OpenAPI. Se apli
 
 Consulta el [contrato de los endpoints técnicos](../docs/api/README.md).
 
+## Pruebas automatizadas de arranque
+
+Desde la raíz del repositorio:
+
+```bash
+dotnet test backend/EduMonitorAI.sln --configuration Release
+```
+
+Para ejecutar únicamente el proyecto de integración y guardar resultados TRX:
+
+```bash
+dotnet test backend/tests/IntegrationTests/EduMonitorAI.IntegrationTests.csproj --configuration Release --logger trx
+```
+
+El proyecto utiliza xUnit y `Microsoft.AspNetCore.Mvc.Testing` para arrancar los puntos de entrada reales con `WebApplicationFactory` y un servidor HTTP en memoria. No requiere levantar servicios previamente, reservar puertos, configurar secretos ni disponer de Moodle o SQL Server. La primera ejecución restaura las dependencias de pruebas desde NuGet.
+
+Los 18 casos (seis por servicio) comprueban:
+
+- `/health`: HTTP 200, contenido `text/plain` y cuerpo `Healthy` en Development, Production y Staging.
+- OpenAPI en Development: HTTP 200, JSON válido, operación `GET /health` y respuestas 200/503 en texto plano documentadas.
+- OpenAPI en Production y Staging: HTTP 404.
+
+Las pruebas establecen el entorno por host y deshabilitan redirecciones automáticas para comprobar las respuestas originales. Los hosts y clientes se liberan al terminar cada caso. Estas pruebas validan el arranque y los contratos técnicos; no prueban sockets de Kestrel, TLS, perfiles locales ni dependencias externas. Los escenarios de estados de salud degradado o fallido quedan fuera de estas pruebas básicas.
+
 ## Límites de esta inicialización
 
-No se implementan autenticación, autorización, sincronización, indicadores, agente, acceso a datos, contratos de negocio, Swagger UI ni proyectos de pruebas automatizadas. `Access.API` todavía no autentica usuarios. Las carpetas de pruebas y `BuildingBlocks` siguen reservadas sin proyectos.
+No se implementan autenticación, autorización, sincronización, indicadores, agente, acceso a datos, contratos de negocio ni Swagger UI. `Access.API` todavía no autentica usuarios. Las pruebas actuales cubren únicamente el arranque; `UnitTests` y `BuildingBlocks` siguen reservadas sin proyectos.
 
 Estos perfiles son para desarrollo local. Antes de un despliegue deberán configurarse HTTPS, identidad, autorización y las demás medidas de la especificación. No hay despliegue ni infraestructura configurados en este alcance.
