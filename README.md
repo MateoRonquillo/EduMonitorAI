@@ -6,7 +6,7 @@ Proyecto académico de MVP para cuatro integrantes y seis semanas, basado en `Pr
 
 ## Estado del repositorio
 
-Actualmente existen la estructura de carpetas, documentación, archivos comunes y una solución con tres hosts ASP.NET Core sobre .NET 10. Cada host arranca y expone únicamente `GET /health` como comprobación de vida. Todavía no hay funcionalidad académica, autenticación, persistencia, integración con Moodle, agente, contenedores, pruebas automatizadas ni flujos de CI configurados.
+Actualmente existen la estructura de carpetas, documentación, archivos comunes y una solución con tres hosts ASP.NET Core sobre .NET 10. Cada host expone `GET /health` como comprobación de vida y el documento OpenAPI en `GET /openapi/v1.json` solo en desarrollo. Todavía no hay funcionalidad académica, autenticación, persistencia, integración con Moodle, agente, contenedores, pruebas automatizadas ni flujos de CI configurados.
 
 Los archivos `.gitkeep` permiten conservar las carpetas vacías en Git. Las variables de [infra/.env.example](infra/.env.example) son propuestas y aún no son consumidas por una aplicación.
 
@@ -95,7 +95,7 @@ EduMonitorAI/
 | `infra/` | Configuración de ejemplo y futuros recursos Docker y Compose. |
 | `.github/workflows/` | Ubicación reservada para integración continua. |
 
-La solución `backend/EduMonitorAI.sln` contiene los tres proyectos `.API`, cada uno con `Program.cs`, configuración de logs y un perfil de ejecución local. Solo está disponible el endpoint técnico `/health`; las responsabilidades de negocio de la tabla siguen pendientes. El servicio de agente y su ubicación dentro del repositorio están pendientes de una decisión documentada; no existe todavía una carpeta ni una implementación para ese componente.
+La solución `backend/EduMonitorAI.sln` contiene los tres proyectos `.API`, cada uno con `Program.cs`, configuración de logs y un perfil de ejecución local. Están disponibles `/health` y OpenAPI en desarrollo; las responsabilidades de negocio de la tabla siguen pendientes. El servicio de agente y su ubicación dentro del repositorio están pendientes de una decisión documentada; no existe todavía una carpeta ni una implementación para ese componente.
 
 ## Arquitectura de referencia
 
@@ -133,6 +133,7 @@ La entrega final también deberá incluir diagrama de arquitectura, esquema de d
 
 - [Frontend](frontend/README.md).
 - [Backend: compilación, ejecución y comprobaciones](backend/README.md).
+- [Endpoints técnicos y OpenAPI local](docs/api/README.md).
 - [Arquitectura](docs/architecture/README.md) y [decisiones técnicas](docs/architecture/decisions/README.md).
 - [Estrategia de ramas y convenciones de commits](docs/gitflow.md).
 - [Pautas de contribución](CONTRIBUTING.md).

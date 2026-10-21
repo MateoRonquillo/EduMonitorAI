@@ -26,6 +26,8 @@ La sección 6 de `Proyecto_EduMonitor_AI_Especificacion.pdf` sugiere ASP.NET Cor
 
 ## Consecuencias y criterios de revisión
 
+Evolución posterior: el incremento de health checks y OpenAPI incorpora `Microsoft.AspNetCore.OpenApi` y documentación local limitada a desarrollo. El [contrato técnico actual](../../api/README.md) describe los endpoints; la ausencia de paquetes OpenAPI indicada arriba corresponde exclusivamente a la inicialización original.
+
 Se requiere el SDK .NET 10 para compilar. Los hosts pueden arrancar sin infraestructura externa, pero una respuesta `Healthy` solo acredita vida del proceso. No valida los requisitos RF/RNF ni la disponibilidad de dependencias.
 
 La identidad, persistencia, integración Moodle, contratos, HTTPS de despliegue y ubicación del agente se resolverán en decisiones posteriores. Revisar esta decisión si cambian las restricciones del entorno académico o el modelo de despliegue.

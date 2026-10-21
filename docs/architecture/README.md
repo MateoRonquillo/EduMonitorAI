@@ -2,7 +2,7 @@
 
 ## Organización propuesta
 
-La solución contiene tres hosts ASP.NET Core con responsabilidades separadas y un endpoint técnico `/health` en cada uno. La lógica de negocio sigue pendiente; estos puntos de entrada no comprometen un despliegue independiente por servicio. Consulta la [inicialización del backend](../../backend/README.md).
+La solución contiene tres hosts ASP.NET Core con responsabilidades separadas, un endpoint técnico `/health` en cada uno y documentación OpenAPI habilitada solo en desarrollo. La lógica de negocio sigue pendiente; estos puntos de entrada no comprometen un despliegue independiente por servicio. Consulta la [inicialización del backend](../../backend/README.md) y los [contratos técnicos](../api/README.md).
 
 | Servicio | Responsabilidad prevista |
 | --- | --- |
