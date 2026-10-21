@@ -1,5 +1,7 @@
 # Contribuir a EduMonitorAI
 
+Sigue la [estrategia de ramas y convenciones de commits](docs/gitflow.md) para crear ramas, preparar pull requests, revisar cambios y registrar contribuciones.
+
 1. Describe el requisito o problema antes de implementar cambios.
 2. Mantén los cambios centrados en un servicio o responsabilidad.
 3. No agregues credenciales, datos personales ni archivos `.env` al repositorio.
