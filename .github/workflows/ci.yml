@@ -1,4 +1,4 @@
-name: CI - Validacion inicial
+name: CI - Validacion del proyecto
 
 on:
   pull_request:
@@ -25,6 +25,7 @@ jobs:
           test -f docs/gitflow.md
           test -d infra/docker
           test -d infra/compose
+          test -f global.json
 
       - name: Verificar archivos de entorno
         run: |
@@ -35,3 +36,25 @@ jobs:
             echo "$archivos"
             exit 1
           fi
+
+  validar-backend:
+    name: Compilar y probar backend .NET
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restaurar dependencias
+        run: dotnet restore backend/EduMonitorAI.sln
+
+      - name: Compilar solucion
+        run: dotnet build backend/EduMonitorAI.sln --configuration Release --no-restore
+
+      - name: Ejecutar pruebas
+        run: dotnet test backend/EduMonitorAI.sln --configuration Release --no-build
