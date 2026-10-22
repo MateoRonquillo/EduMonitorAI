@@ -1,0 +1,28 @@
+{
+  "courseid": 50,
+  "coursename": "Metodologías Ágiles",
+  "students": [
+    {
+      "userid": 201,
+      "username": "est.prueba1",
+      "grades": [
+        { "itemname": "Examen Parcial 1", "graderaw": 8.5, "status": "evaluado" },
+        { "itemname": "Tarea Autónoma 1", "graderaw": null, "status": "pendiente" }
+      ]
+    },
+    {
+      "userid": 202,
+      "username": "est.prueba2",
+      "grades": [
+        { "itemname": "Examen Parcial 1", "graderaw": null, "status": "ausente" }
+      ]
+    },
+    {
+      "userid": 203,
+      "username": "est.prueba3",
+      "grades": [
+        { "itemname": "Examen Parcial 1", "graderaw": 0.0, "status": "evaluado" }
+      ]
+    }
+  ]
+}
