@@ -1,0 +1,78 @@
+name: edumonitorai
+
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Configurar POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:?Configurar POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configurar POSTGRES_PASSWORD}
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    networks:
+      - backend
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  moodle-integration:
+    build:
+      context: ../..
+      dockerfile: infra/docker/MoodleIntegration.Dockerfile
+    image: edumonitorai-moodle:dev
+    restart: unless-stopped
+
+    ports:
+      - "127.0.0.1:5101:8080"
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+
+    networks:
+      - backend
+
+  academic-data:
+    build:
+      context: ../..
+      dockerfile: infra/docker/AcademicData.Dockerfile
+    image: edumonitorai-academic:dev
+    restart: unless-stopped
+
+    ports:
+      - "127.0.0.1:5102:8080"
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+
+    networks:
+      - backend
+
+  access:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Access.Dockerfile
+    image: edumonitorai-access:dev
+    restart: unless-stopped
+
+    ports:
+      - "127.0.0.1:5103:8080"
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  backend:
+    driver: bridge

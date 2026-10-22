@@ -1,0 +1,20 @@
+# Git y configuracion del editor
+.git
+.github
+.vs
+.vscode
+
+# Archivos generados por .NET
+**/bin
+**/obj
+**/TestResults
+**/*.user
+**/*.suo
+
+# Dependencias y compilaciones del frontend
+**/node_modules
+**/dist
+
+# Variables de entorno privadas
+**/.env
+**/.env.*
