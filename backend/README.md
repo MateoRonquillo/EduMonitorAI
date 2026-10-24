@@ -102,16 +102,17 @@ dotnet test backend/tests/IntegrationTests/EduMonitorAI.IntegrationTests.csproj 
 
 El proyecto utiliza xUnit y `Microsoft.AspNetCore.Mvc.Testing` para arrancar los puntos de entrada reales con `WebApplicationFactory` y un servidor HTTP en memoria. No requiere levantar servicios previamente, reservar puertos, configurar secretos ni disponer de Moodle o SQL Server. La primera ejecución restaura las dependencias de pruebas desde NuGet.
 
-Los 18 casos (seis por servicio) comprueban:
+Los 22 casos cubren el arranque (seis por servicio) y la autorización por curso en `Access.API` (cuatro escenarios):
 
 - `/health`: HTTP 200, contenido `text/plain` y cuerpo `Healthy` en Development, Production y Staging.
 - OpenAPI en Development: HTTP 200, JSON válido, operación `GET /health` y respuestas 200/503 en texto plano documentadas.
 - OpenAPI en Production y Staging: HTTP 404.
+- Autorización por curso: docente con grant (204), docente sin grant para ese curso (403 `course_forbidden`), rol de estudiante (401 `unauthorized`) y solicitud sin sesión (401 `unauthorized`). Los JWT de estas pruebas se firman localmente con una clave de prueba; no acceden a un proveedor externo.
 
 Las pruebas establecen el entorno por host y deshabilitan redirecciones automáticas para comprobar las respuestas originales. Los hosts y clientes se liberan al terminar cada caso. Estas pruebas validan el arranque y los contratos técnicos; no prueban sockets de Kestrel, TLS, perfiles locales ni dependencias externas. Los escenarios de estados de salud degradado o fallido quedan fuera de estas pruebas básicas.
 
 ## Límites de esta inicialización
 
-No se implementan sincronización, indicadores, agente, acceso a datos ni Swagger UI. La autorización por curso se limita a los grants `course_access` del token; la consulta institucional en tiempo real y las pruebas específicas de permisos quedan pendientes. Las pruebas actuales cubren únicamente el arranque; `UnitTests` y `BuildingBlocks` siguen reservadas sin proyectos.
+No se implementan sincronización, indicadores, agente, acceso a datos ni Swagger UI. La autorización por curso se limita a los grants `course_access` del token; la consulta institucional en tiempo real queda pendiente. Las pruebas unitarias de dominio y `BuildingBlocks` siguen reservadas sin proyectos.
 
 Estos perfiles son para desarrollo local. Antes de un despliegue deberán configurarse HTTPS, identidad, autorización y las demás medidas de la especificación. No hay despliegue ni infraestructura configurados en este alcance.

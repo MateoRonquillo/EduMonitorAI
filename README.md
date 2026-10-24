@@ -125,13 +125,13 @@ dotnet build backend/EduMonitorAI.sln --no-restore
 
 El [README del backend](backend/README.md) detalla la ejecución de los tres hosts y la verificación de `/health` en los puertos locales 5101, 5102 y 5103. No se requieren tokens, Moodle ni base de datos para este arranque. El frontend sigue sin implementar.
 
-Para ejecutar las 18 pruebas automatizadas de arranque de los tres servicios:
+Para ejecutar las pruebas automatizadas de arranque y autorización de los tres servicios:
 
 ```bash
 dotnet test backend/EduMonitorAI.sln --configuration Release
 ```
 
-Las pruebas utilizan hosts HTTP en memoria y validan `/health` y OpenAPI en Development, Production y Staging. No sustituyen las futuras pruebas de indicadores, permisos o integración con Moodle.
+Las pruebas utilizan hosts HTTP en memoria y validan `/health`, OpenAPI en Development, Production y Staging, y los escenarios de autorización por curso en `Access.API`. No sustituyen las futuras pruebas de indicadores o integración con Moodle.
 
 Al implementar los componentes, este README deberá incorporar versiones y prerrequisitos, instalación, configuración sin secretos, ejecución local, pruebas y despliegue reproducibles. La aceptación del MVP deberá demostrar acceso restringido por curso, datos concordantes con Moodle, estados académicos diferenciados, alertas con evidencia y tres solicitudes del agente mediante herramientas reales, incluyendo el manejo de fallos sin inventar información.
 
