@@ -11,5 +11,6 @@ Crea un archivo `NNNN-titulo.md` por decisión relevante con estas secciones:
 ## Decisiones registradas
 
 - [0001 - Inicializar los puntos de entrada con ASP.NET Core](0001-inicializacion-aspnet-core.md).
+- [0002 - Validar identidad docente con un proveedor OpenID Connect confiable](0002-identidad-docente-openid-connect.md).
 
-Las decisiones sobre bases de datos y proveedores de identidad siguen pendientes.
+Las decisiones sobre bases de datos siguen pendientes.

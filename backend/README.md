@@ -13,7 +13,7 @@ dotnet restore backend/EduMonitorAI.sln
 dotnet build backend/EduMonitorAI.sln --no-restore
 ```
 
-Los proyectos utilizan el framework compartido de ASP.NET Core y el paquete oficial `Microsoft.AspNetCore.OpenApi` 10.0.13 para generar la documentación. La primera restauración requiere acceso a NuGet o una caché con sus dependencias.
+Los proyectos utilizan el framework compartido de ASP.NET Core y el paquete oficial `Microsoft.AspNetCore.OpenApi` 10.0.13 para generar la documentación. `Access.API` usa además `Microsoft.AspNetCore.Authentication.JwtBearer` 10.0.13. La primera restauración requiere acceso a NuGet o una caché con sus dependencias.
 
 ## Ejecución local
 
@@ -36,6 +36,12 @@ dotnet run --project backend/src/Services/Access.API --launch-profile http
 | MoodleIntegration.API | `http://localhost:5101/health` |
 | AcademicData.API | `http://localhost:5102/health` |
 | Access.API | `http://localhost:5103/health` |
+
+## Identidad y sesión docente
+
+`Access.API` valida JWT emitidos por un proveedor OpenID Connect confiable. Configura `Identity__Authority` con la URL HTTPS del emisor y `Identity__Audience` con la audiencia de la API antes de llamar `GET /auth/session`. No guardes secretos ni tokens en el repositorio. Un token válido debe estar firmado, vigente, corresponder al emisor y audiencia configurados e incluir `sub`, `teacher_id` y `role: docente`. La ruta responde con la identidad verificada o HTTP 401 Problem Details con `code: unauthorized`.
+
+La API valida sesiones pero no ofrece inicio de sesión, emisión ni renovación de tokens. La definición del contrato y su respuesta de error está en la [documentación de API](../docs/api/README.md).
 
 ```bash
 curl --fail http://localhost:5101/health
@@ -104,6 +110,6 @@ Las pruebas establecen el entorno por host y deshabilitan redirecciones automát
 
 ## Límites de esta inicialización
 
-No se implementan autenticación, autorización, sincronización, indicadores, agente, acceso a datos, contratos de negocio ni Swagger UI. `Access.API` todavía no autentica usuarios. Las pruebas actuales cubren únicamente el arranque; `UnitTests` y `BuildingBlocks` siguen reservadas sin proyectos.
+No se implementan autorización por curso, sincronización, indicadores, agente, acceso a datos ni Swagger UI. La autenticación se limita a la validación de identidad docente descrita arriba. Las pruebas actuales cubren únicamente el arranque; `UnitTests` y `BuildingBlocks` siguen reservadas sin proyectos.
 
 Estos perfiles son para desarrollo local. Antes de un despliegue deberán configurarse HTTPS, identidad, autorización y las demás medidas de la especificación. No hay despliegue ni infraestructura configurados en este alcance.
