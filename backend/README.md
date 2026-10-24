@@ -1,6 +1,6 @@
 # Backend de EduMonitorAI
 
-La solución contiene tres proyectos ASP.NET Core sobre .NET 10. Cada proyecto dispone de un punto de entrada en `Program.cs` y una comprobación de vida en `GET /health`. `MoodleIntegration.API` expone consultas protegidas de cursos y participantes de Moodle.
+La solución contiene tres proyectos ASP.NET Core sobre .NET 10. Cada proyecto dispone de un punto de entrada en `Program.cs` y una comprobación de vida en `GET /health`. `MoodleIntegration.API` expone consultas protegidas de cursos, participantes, actividades y calificaciones de Moodle.
 
 ## Requisitos y compilación
 
@@ -104,9 +104,9 @@ Las pruebas establecen el entorno por host y deshabilitan redirecciones automát
 
 ## Consultas protegidas a Moodle
 
-Configura `Identity__Authority` y `Identity__Audience` para validar el JWT, además de `Moodle__BaseUrl` y `Moodle__Token` para el servicio web REST. La URL base debe ser HTTPS, excepto para loopback local. Moodle debe habilitar REST y autorizar `core_course_get_courses` y `core_enrol_get_enrolled_users`; los detalles están en la [guía del laboratorio](../docs/moodle/configuracion-laboratorio.md).
+Configura `Identity__Authority` y `Identity__Audience` para validar el JWT, además de `Moodle__BaseUrl` y `Moodle__Token` para el servicio web REST. La URL base debe ser HTTPS, excepto para loopback local. Moodle debe habilitar REST y autorizar `core_course_get_courses`, `core_enrol_get_enrolled_users`, `core_course_get_contents` y `gradereport_user_get_grade_items`; los detalles están en la [guía del laboratorio](../docs/moodle/configuracion-laboratorio.md).
 
-`GET /courses` filtra la respuesta del token técnico mediante los claims `course_access` del JWT firmado. `GET /courses/{courseId}/participants` verifica el mismo grant antes de consultar matrículas activas. Los errores de Moodle se devuelven como Problem Details 502/503 sin incluir mensajes internos. `infra/.env.example` no se carga automáticamente al ejecutar `dotnet run`; Compose sí pasa estas variables al contenedor MoodleIntegration.
+`GET /courses` filtra la respuesta del token técnico mediante los claims `course_access` del JWT firmado. Las rutas `/courses/{courseId}/participants`, `/activities` y `/grades` verifican el mismo grant antes de consultar Moodle; el reporte de notas se restringe además a matrículas activas. Las notas conservan `null`, distinguen nota cero evaluada y exponen el estado `pendiente` cuando Moodle registra entrega sin calificación o `sin_calificar` cuando no reporta esos datos. Los errores de Moodle se devuelven como Problem Details 502/503 sin incluir mensajes internos. `infra/.env.example` no se carga automáticamente al ejecutar `dotnet run`; Compose sí pasa estas variables al contenedor MoodleIntegration.
 
 ## Límites actuales
 

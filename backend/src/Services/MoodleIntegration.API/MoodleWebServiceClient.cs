@@ -29,6 +29,18 @@ public sealed class MoodleWebServiceClient(HttpClient httpClient, IOptions<Moodl
             ],
             cancellationToken);
 
+    public Task<IReadOnlyList<MoodleCourseSection>> GetCourseContentsAsync(int courseId, CancellationToken cancellationToken) =>
+        CallAsync<IReadOnlyList<MoodleCourseSection>>(
+            "core_course_get_contents",
+            [new("courseid", courseId.ToString(System.Globalization.CultureInfo.InvariantCulture))],
+            cancellationToken);
+
+    public Task<MoodleGradeReport> GetGradeReportAsync(int courseId, CancellationToken cancellationToken) =>
+        CallAsync<MoodleGradeReport>(
+            "gradereport_user_get_grade_items",
+            [new("courseid", courseId.ToString(System.Globalization.CultureInfo.InvariantCulture))],
+            cancellationToken);
+
     private async Task<T> CallAsync<T>(string function, IEnumerable<KeyValuePair<string, string>> parameters, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(_options.BaseUrl) || string.IsNullOrWhiteSpace(_options.Token))
@@ -163,6 +175,51 @@ public sealed class MoodleRole
     public string? Name { get; init; }
 }
 
+public sealed class MoodleCourseSection
+{
+    public int Section { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public List<MoodleActivity>? Modules { get; init; } = [];
+}
+
+public sealed class MoodleActivity
+{
+    public int Id { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public string ModuleName { get; init; } = string.Empty;
+    public string? Description { get; init; }
+    public bool Visible { get; init; }
+    public bool UserVisible { get; init; }
+    public string? Url { get; init; }
+}
+
+public sealed class MoodleGradeReport
+{
+    public List<MoodleUserGrade>? UserGrades { get; init; } = [];
+}
+
+public sealed class MoodleUserGrade
+{
+    public int UserId { get; init; }
+    public string UserFullName { get; init; } = string.Empty;
+    public List<MoodleGradeItem>? GradeItems { get; init; } = [];
+}
+
+public sealed class MoodleGradeItem
+{
+    public int Id { get; init; }
+    public string ItemName { get; init; } = string.Empty;
+    public string ItemType { get; init; } = string.Empty;
+    public string? ItemModule { get; init; }
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+    public double? GradeRaw { get; init; }
+    public string? GradeFormatted { get; init; }
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+    public long? GradeDateSubmitted { get; init; }
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+    public long? GradeDateGraded { get; init; }
+}
+
 public sealed record CourseResponse(
     int Id,
     string ShortName,
@@ -176,6 +233,33 @@ public sealed record CourseParticipantResponse(
     int Id,
     string FullName,
     IReadOnlyList<string> Roles);
+
+public sealed record CourseActivityResponse(
+    int Id,
+    int Section,
+    string SectionName,
+    string Name,
+    string Module,
+    string? Description,
+    bool Visible,
+    bool UserVisible,
+    string? Url);
+
+public sealed record StudentCourseGradesResponse(
+    int UserId,
+    string FullName,
+    IReadOnlyList<CourseGradeItemResponse> Grades);
+
+public sealed record CourseGradeItemResponse(
+    int Id,
+    string ItemName,
+    string ItemType,
+    string? Module,
+    double? GradeRaw,
+    string? GradeFormatted,
+    string Status,
+    DateTimeOffset? SubmittedAtUtc,
+    DateTimeOffset? GradedAtUtc);
 
 public static class MoodleResponseMapper
 {
@@ -202,6 +286,46 @@ public static class MoodleResponseMapper
             .ToArray();
 
         return new CourseParticipantResponse(participant.Id, fullName, roles);
+    }
+
+    public static IEnumerable<CourseActivityResponse> Map(MoodleCourseSection section) =>
+        (section.Modules ?? []).Select(activity => new CourseActivityResponse(
+            activity.Id,
+            section.Section,
+            section.Name,
+            activity.Name,
+            activity.ModuleName,
+            activity.Description,
+            activity.Visible,
+            activity.UserVisible,
+            activity.Url));
+
+    public static StudentCourseGradesResponse Map(MoodleUserGrade userGrade) => new(
+        userGrade.UserId,
+        userGrade.UserFullName,
+        (userGrade.GradeItems ?? []).Select(Map).ToArray());
+
+    public static CourseGradeItemResponse Map(MoodleGradeItem gradeItem) => new(
+        gradeItem.Id,
+        gradeItem.ItemName,
+        gradeItem.ItemType,
+        gradeItem.ItemModule,
+        gradeItem.GradeRaw,
+        gradeItem.GradeFormatted,
+        GetGradeStatus(gradeItem),
+        ToDateTimeOffset(gradeItem.GradeDateSubmitted),
+        ToDateTimeOffset(gradeItem.GradeDateGraded));
+
+    private static string GetGradeStatus(MoodleGradeItem gradeItem)
+    {
+        if (gradeItem.GradeRaw.HasValue)
+        {
+            return "evaluado";
+        }
+
+        return gradeItem.GradeDateSubmitted is > 0
+            ? "pendiente"
+            : "sin_calificar";
     }
 
     private static DateTimeOffset? ToDateTimeOffset(long? timestamp) =>

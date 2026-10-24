@@ -195,6 +195,95 @@ app.MapGet("/courses/{courseId:int}/participants", async (
     .ProducesProblem(StatusCodes.Status502BadGateway)
     .ProducesProblem(StatusCodes.Status503ServiceUnavailable);
 
+app.MapGet("/courses/{courseId:int}/activities", async (
+        int courseId,
+        MoodleWebServiceClient moodle,
+        ILogger<Program> logger,
+        CancellationToken cancellationToken) =>
+    {
+        try
+        {
+            var sections = await moodle.GetCourseContentsAsync(courseId, cancellationToken);
+            var activities = sections.SelectMany(section => MoodleResponseMapper.Map(section)).ToArray();
+            return Results.Ok(activities);
+        }
+        catch (MoodleServiceException exception)
+        {
+            logger.LogWarning("Moodle activity query for course {CourseId} failed with error code {ErrorCode}", courseId, exception.ErrorCode);
+            return MoodleError(exception);
+        }
+        catch (HttpRequestException)
+        {
+            logger.LogWarning("Moodle activity query for course {CourseId} could not reach the configured service", courseId);
+            return MoodleUnavailable();
+        }
+        catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            logger.LogWarning("Moodle activity query for course {CourseId} timed out", courseId);
+            return MoodleUnavailable();
+        }
+    })
+    .RequireAuthorization("CourseAccess")
+    .WithName("GetPermittedCourseActivities")
+    .WithSummary("Consultar actividades de un curso permitido")
+    .WithDescription("Consulta las secciones y actividades del curso en Moodle. Requiere un grant course_access para el ID solicitado.")
+    .Produces<IReadOnlyList<CourseActivityResponse>>(StatusCodes.Status200OK)
+    .ProducesProblem(StatusCodes.Status401Unauthorized)
+    .ProducesProblem(StatusCodes.Status403Forbidden)
+    .ProducesProblem(StatusCodes.Status502BadGateway)
+    .ProducesProblem(StatusCodes.Status503ServiceUnavailable);
+
+app.MapGet("/courses/{courseId:int}/grades", async (
+        int courseId,
+        MoodleWebServiceClient moodle,
+        ILogger<Program> logger,
+        CancellationToken cancellationToken) =>
+    {
+        try
+        {
+            var activeParticipants = await moodle.GetEnrolledUsersAsync(courseId, cancellationToken);
+            var activeIds = activeParticipants.Select(participant => participant.Id).ToHashSet();
+            var gradeReport = await moodle.GetGradeReportAsync(courseId, cancellationToken);
+            var gradesByUser = (gradeReport.UserGrades ?? [])
+                .Where(userGrade => activeIds.Contains(userGrade.UserId))
+                .GroupBy(userGrade => userGrade.UserId)
+                .ToDictionary(group => group.Key, group => group.First());
+            var grades = activeParticipants
+                .Select(participant => new StudentCourseGradesResponse(
+                    participant.Id,
+                    MoodleResponseMapper.Map(participant).FullName,
+                    gradesByUser.TryGetValue(participant.Id, out var userGrade)
+                        ? (userGrade.GradeItems ?? []).Select(MoodleResponseMapper.Map).ToArray()
+                        : []))
+                .ToArray();
+            return Results.Ok(grades);
+        }
+        catch (MoodleServiceException exception)
+        {
+            logger.LogWarning("Moodle grade query for course {CourseId} failed with error code {ErrorCode}", courseId, exception.ErrorCode);
+            return MoodleError(exception);
+        }
+        catch (HttpRequestException)
+        {
+            logger.LogWarning("Moodle grade query for course {CourseId} could not reach the configured service", courseId);
+            return MoodleUnavailable();
+        }
+        catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            logger.LogWarning("Moodle grade query for course {CourseId} timed out", courseId);
+            return MoodleUnavailable();
+        }
+    })
+    .RequireAuthorization("CourseAccess")
+    .WithName("GetPermittedCourseGrades")
+    .WithSummary("Consultar calificaciones de participantes activos de un curso permitido")
+    .WithDescription("Consulta el reporte de calificaciones y limita su respuesta a los participantes activos del curso. Los valores ausentes permanecen null.")
+    .Produces<IReadOnlyList<StudentCourseGradesResponse>>(StatusCodes.Status200OK)
+    .ProducesProblem(StatusCodes.Status401Unauthorized)
+    .ProducesProblem(StatusCodes.Status403Forbidden)
+    .ProducesProblem(StatusCodes.Status502BadGateway)
+    .ProducesProblem(StatusCodes.Status503ServiceUnavailable);
+
 app.MapGet("/health", async (HealthCheckService healthChecks, CancellationToken cancellationToken) =>
     {
         var report = await healthChecks.CheckHealthAsync(cancellationToken);

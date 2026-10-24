@@ -6,7 +6,7 @@ Proyecto académico de MVP para cuatro integrantes y seis semanas, basado en `Pr
 
 ## Estado del repositorio
 
-Actualmente existen la estructura de carpetas, documentación, archivos comunes y una solución con tres hosts ASP.NET Core sobre .NET 10 y pruebas automatizadas de arranque. Cada host expone `GET /health` y el documento OpenAPI solo en desarrollo. `MoodleIntegration.API` consulta cursos y participantes activos mediante Moodle REST, protegida por JWT docente y grants de curso; para ejecutarla hacen falta un proveedor de identidad y un servidor Moodle externos. Persistencia, indicadores, agente y flujos de CI siguen pendientes.
+Actualmente existen la estructura de carpetas, documentación, archivos comunes y una solución con tres hosts ASP.NET Core sobre .NET 10 y pruebas automatizadas de arranque. Cada host expone `GET /health` y el documento OpenAPI solo en desarrollo. `MoodleIntegration.API` consulta cursos, participantes activos, actividades y calificaciones mediante Moodle REST, protegida por JWT docente y grants de curso; para ejecutarla hacen falta un proveedor de identidad y un servidor Moodle externos. Persistencia, indicadores, agente y flujos de CI siguen pendientes.
 
 Los archivos `.gitkeep` permiten conservar las carpetas vacías en Git. MoodleIntegration consume `MOODLE_BASE_URL`, `MOODLE_API_TOKEN`, `IDENTITY_AUTHORITY` e `IDENTITY_AUDIENCE` cuando se proporcionan mediante el entorno; `dotnet run` no carga automáticamente `infra/.env.example`.
 
@@ -15,7 +15,7 @@ Los archivos `.gitkeep` permiten conservar las carpetas vacías en Git. MoodleIn
 | Requisitos | Resultado esperado |
 | --- | --- |
 | RF-01 | Autenticación con roles docente y administrador técnico; acceso solo a cursos y estudiantes autorizados. |
-| RF-02 y RF-03 | Consulta de cursos y participantes autorizados desde Moodle implementada; sincronización de ítems, notas y estados de actividad, registro de fecha y flujo completo de sincronización pendientes. |
+| RF-02 y RF-03 | Consulta de cursos, participantes activos, actividades y calificaciones autorizados desde Moodle implementada; sincronización persistente, registro de fecha y flujo completo de sincronización pendientes. Las notas conservan valores ausentes sin convertirlos en cero. |
 | RF-04 | Selección de curso y período, listado de estudiantes, búsqueda y filtros. |
 | RF-05 y RF-06 | Dashboard y ficha individual con promedios de escala explícita, distribución, progreso disponible y evolución; distinción entre nota cero, sin entrega, pendiente de calificación y completado. |
 | RF-07 y RF-08 | Alertas configurables con evidencia y análisis de tendencias grupales, sin etiquetas definitivas sobre estudiantes. |
