@@ -1,10 +1,10 @@
 # Backend de EduMonitorAI
 
-La solución contiene tres proyectos ASP.NET Core sobre .NET 10. Cada proyecto dispone de un punto de entrada en `Program.cs` y una comprobación de vida en `GET /health`.
+La solución contiene tres proyectos ASP.NET Core sobre .NET 10. Cada proyecto dispone de un punto de entrada en `Program.cs` y una comprobación de vida en `GET /health`. `MoodleIntegration.API` expone consultas protegidas de cursos y participantes de Moodle.
 
 ## Requisitos y compilación
 
-Instalar el SDK .NET 10 estable. El `global.json` de la raíz admite las bandas estables de SDK 10.0 desde 10.0.100 y selecciona la más reciente instalada. No se necesitan base de datos, Moodle ni credenciales para este arranque.
+Instalar el SDK .NET 10 estable. El `global.json` de la raíz admite las bandas estables de SDK 10.0 desde 10.0.100 y selecciona la más reciente instalada. El arranque y `/health` no requieren Moodle ni credenciales; las rutas académicas sí.
 
 Desde la raíz del repositorio:
 
@@ -13,7 +13,7 @@ dotnet restore backend/EduMonitorAI.sln
 dotnet build backend/EduMonitorAI.sln --no-restore
 ```
 
-Los proyectos utilizan el framework compartido de ASP.NET Core y el paquete oficial `Microsoft.AspNetCore.OpenApi` 10.0.13 para generar la documentación. La primera restauración requiere acceso a NuGet o una caché con sus dependencias.
+Los proyectos utilizan el framework compartido de ASP.NET Core y el paquete oficial `Microsoft.AspNetCore.OpenApi` 10.0.13 para generar la documentación. `MoodleIntegration.API` usa además `Microsoft.AspNetCore.Authentication.JwtBearer` 10.0.13 y el cliente HTTP integrado de .NET. La primera restauración requiere acceso a NuGet o una caché con sus dependencias.
 
 ## Ejecución local
 
@@ -43,7 +43,7 @@ curl --fail http://localhost:5102/health
 curl --fail http://localhost:5103/health
 ```
 
-Cada comprobación debe devolver HTTP 200 y `Healthy`. Solo confirma que el proceso atiende solicitudes; no verifica Moodle, persistencia ni permisos. Las rutas de negocio y `/` no están mapeadas y devuelven HTTP 404.
+Cada comprobación debe devolver HTTP 200 y `Healthy`. Solo confirma que el proceso atiende solicitudes; no verifica Moodle ni permisos. Las rutas `GET /courses` y `GET /courses/{courseId}/participants` requieren un JWT de docente y configuración válida de Moodle.
 
 El endpoint usa `HealthCheckService`: responde texto plano con estado `Healthy` o `Degraded` y HTTP 200, o `Unhealthy` y HTTP 503. No hay sondas de dependencias registradas en este alcance, por lo que un proceso operativo devuelve `Healthy`.
 
@@ -102,8 +102,14 @@ Los 18 casos (seis por servicio) comprueban:
 
 Las pruebas establecen el entorno por host y deshabilitan redirecciones automáticas para comprobar las respuestas originales. Los hosts y clientes se liberan al terminar cada caso. Estas pruebas validan el arranque y los contratos técnicos; no prueban sockets de Kestrel, TLS, perfiles locales ni dependencias externas. Los escenarios de estados de salud degradado o fallido quedan fuera de estas pruebas básicas.
 
-## Límites de esta inicialización
+## Consultas protegidas a Moodle
 
-No se implementan autenticación, autorización, sincronización, indicadores, agente, acceso a datos, contratos de negocio ni Swagger UI. `Access.API` todavía no autentica usuarios. Las pruebas actuales cubren únicamente el arranque; `UnitTests` y `BuildingBlocks` siguen reservadas sin proyectos.
+Configura `Identity__Authority` y `Identity__Audience` para validar el JWT, además de `Moodle__BaseUrl` y `Moodle__Token` para el servicio web REST. La URL base debe ser HTTPS, excepto para loopback local. Moodle debe habilitar REST y autorizar `core_course_get_courses` y `core_enrol_get_enrolled_users`; los detalles están en la [guía del laboratorio](../docs/moodle/configuracion-laboratorio.md).
+
+`GET /courses` filtra la respuesta del token técnico mediante los claims `course_access` del JWT firmado. `GET /courses/{courseId}/participants` verifica el mismo grant antes de consultar matrículas activas. Los errores de Moodle se devuelven como Problem Details 502/503 sin incluir mensajes internos. `infra/.env.example` no se carga automáticamente al ejecutar `dotnet run`; Compose sí pasa estas variables al contenedor MoodleIntegration.
+
+## Límites actuales
+
+No se implementan persistencia, sincronización en segundo plano, indicadores, agente ni Swagger UI. El proveedor de identidad y el token Moodle deben configurarse en cada entorno. Las pruebas actuales cubren únicamente el arranque; `UnitTests` y `BuildingBlocks` siguen reservadas sin proyectos.
 
 Estos perfiles son para desarrollo local. Antes de un despliegue deberán configurarse HTTPS, identidad, autorización y las demás medidas de la especificación. No hay despliegue ni infraestructura configurados en este alcance.

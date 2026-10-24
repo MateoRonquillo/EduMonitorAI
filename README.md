@@ -6,16 +6,16 @@ Proyecto académico de MVP para cuatro integrantes y seis semanas, basado en `Pr
 
 ## Estado del repositorio
 
-Actualmente existen la estructura de carpetas, documentación, archivos comunes y una solución con tres hosts ASP.NET Core sobre .NET 10 y pruebas automatizadas de arranque. Cada host expone `GET /health` como comprobación de vida y el documento OpenAPI en `GET /openapi/v1.json` solo en desarrollo. Todavía no hay funcionalidad académica, autenticación, persistencia, integración con Moodle, agente, contenedores ni flujos de CI configurados.
+Actualmente existen la estructura de carpetas, documentación, archivos comunes y una solución con tres hosts ASP.NET Core sobre .NET 10 y pruebas automatizadas de arranque. Cada host expone `GET /health` y el documento OpenAPI solo en desarrollo. `MoodleIntegration.API` consulta cursos y participantes activos mediante Moodle REST, protegida por JWT docente y grants de curso; para ejecutarla hacen falta un proveedor de identidad y un servidor Moodle externos. Persistencia, indicadores, agente y flujos de CI siguen pendientes.
 
-Los archivos `.gitkeep` permiten conservar las carpetas vacías en Git. Las variables de [infra/.env.example](infra/.env.example) son propuestas y aún no son consumidas por una aplicación.
+Los archivos `.gitkeep` permiten conservar las carpetas vacías en Git. MoodleIntegration consume `MOODLE_BASE_URL`, `MOODLE_API_TOKEN`, `IDENTITY_AUTHORITY` e `IDENTITY_AUDIENCE` cuando se proporcionan mediante el entorno; `dotnet run` no carga automáticamente `infra/.env.example`.
 
 ## Alcance del MVP
 
 | Requisitos | Resultado esperado |
 | --- | --- |
 | RF-01 | Autenticación con roles docente y administrador técnico; acceso solo a cursos y estudiantes autorizados. |
-| RF-02 y RF-03 | Configuración segura de la conexión a Moodle y sincronización manual de cursos, matriculados, ítems, notas y estados de actividad según API y permisos disponibles; registro de fecha y errores. |
+| RF-02 y RF-03 | Consulta de cursos y participantes autorizados desde Moodle implementada; sincronización de ítems, notas y estados de actividad, registro de fecha y flujo completo de sincronización pendientes. |
 | RF-04 | Selección de curso y período, listado de estudiantes, búsqueda y filtros. |
 | RF-05 y RF-06 | Dashboard y ficha individual con promedios de escala explícita, distribución, progreso disponible y evolución; distinción entre nota cero, sin entrega, pendiente de calificación y completado. |
 | RF-07 y RF-08 | Alertas configurables con evidencia y análisis de tendencias grupales, sin etiquetas definitivas sobre estudiantes. |
@@ -103,7 +103,7 @@ La especificación sugiere React para el frontend, ASP.NET Core Web API para el 
 
 El frontend consumirá el backend; este controlará la autorización y el acceso a datos y a Moodle. El agente invocará herramientas controladas del backend y no accederá directamente a credenciales ni a tablas sin controles. La separación entre API, aplicación, dominio e infraestructura se desarrollará conforme se creen los proyectos, según la [guía de arquitectura](docs/architecture/README.md).
 
-La elección de .NET 10 y los hosts mínimos se registra en la [decisión 0001](docs/architecture/decisions/0001-inicializacion-aspnet-core.md). Las demás versiones, la distribución de capas, la ubicación del agente, el mecanismo de identidad y el despliegue se registrarán en [decisiones de arquitectura](docs/architecture/decisions/README.md) antes de introducir las dependencias correspondientes.
+La elección de .NET 10 y los hosts mínimos se registra en la [decisión 0001](docs/architecture/decisions/0001-inicializacion-aspnet-core.md). La integración Moodle protegida por OpenID Connect se registra en la [decisión 0002](docs/architecture/decisions/0002-integracion-moodle-protegida.md). Las demás versiones, la distribución de capas, la ubicación del agente y el despliegue se registrarán en [decisiones de arquitectura](docs/architecture/decisions/README.md) antes de introducir dependencias correspondientes.
 
 ## Seguridad y calidad esperadas
 

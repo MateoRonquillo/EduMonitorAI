@@ -21,3 +21,10 @@ Para que la API .NET consuma los datos académicos de forma segura, se debe conf
   * `core_course_get_courses`
   * `core_enrol_get_enrolled_users`
   * `gradereport_user_get_grade_items`
+* **Matrículas activas:** La integración envía `onlyactive=1` al consultar participantes. El token técnico debe tener las capacidades Moodle requeridas por esta opción, en particular `moodle/course:enrolreview` en los cursos consultados.
+
+## 4. Configuración de MoodleIntegration.API
+
+La API utiliza `Moodle__BaseUrl` (por ejemplo, `https://moodle.example.org`) y `Moodle__Token`. El token se envía por POST al endpoint `/webservice/rest/server.php`; no se guarda en código ni se coloca en la URL. Para desarrollo local, copia las variables de [`infra/.env.example`](../../infra/.env.example) a `infra/compose/.env`; el Compose las pasa al contenedor `moodle-integration`.
+
+También se requiere `Identity__Authority` y `Identity__Audience`. El proveedor debe emitir tokens firmados con `sub`, `teacher_id`, `role: docente` y un claim `course_access` por cada curso permitido. `GET /courses` filtra la respuesta Moodle por esos grants; `GET /courses/{courseId}/participants` valida el grant antes de consultar a Moodle. Consulta el contrato en la [documentación de API](../api/README.md).
