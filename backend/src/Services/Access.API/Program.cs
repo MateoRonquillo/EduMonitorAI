@@ -1,7 +1,9 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
+using EduMonitorAI.Access.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,11 +63,34 @@ builder.Services
                     code = "unauthorized",
                     detail = "Se requiere un token válido de una identidad docente confiable."
                 });
+            },
+            OnForbidden = async context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                context.Response.ContentType = "application/problem+json";
+
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    type = "https://httpstatuses.com/403",
+                    title = "Acceso denegado",
+                    status = StatusCodes.Status403Forbidden,
+                    code = "course_forbidden",
+                    detail = "La identidad autenticada no tiene permisos efectivos sobre el curso solicitado."
+                });
             }
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<IAuthorizationHandler, CourseAccessHandler>();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(CourseAccessRequirement.PolicyName, policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.AddRequirements(new CourseAccessRequirement());
+    });
+});
 builder.Services.AddHealthChecks();
 builder.Services.AddOpenApi();
 
@@ -95,6 +120,15 @@ app.MapGet("/auth/session", (ClaimsPrincipal user) =>
     .WithDescription("Valida un token firmado por el emisor configurado y devuelve la identidad docente verificada.")
     .Produces<TeacherSessionIdentity>(StatusCodes.Status200OK)
     .ProducesProblem(StatusCodes.Status401Unauthorized);
+
+app.MapGet("/courses/{courseId}/access", () => Results.NoContent())
+    .RequireAuthorization(CourseAccessRequirement.PolicyName)
+    .WithName("CheckCourseAccess")
+    .WithSummary("Comprobar el acceso efectivo a un curso")
+    .WithDescription("Responde sin contenido si el token confiable incluye un permiso para el curso indicado.")
+    .Produces(StatusCodes.Status204NoContent)
+    .ProducesProblem(StatusCodes.Status401Unauthorized)
+    .ProducesProblem(StatusCodes.Status403Forbidden);
 
 app.MapGet("/health", async (HealthCheckService healthChecks, CancellationToken cancellationToken) =>
     {

@@ -9,6 +9,8 @@ Los tres hosts (`MoodleIntegration.API`, `AcademicData.API` y `Access.API`) expo
 | `GET /openapi/v1.json` | Cualquier otro entorno | HTTP 404; la ruta no se registra. |
 | `GET /auth/session` | `Access.API`, token válido | HTTP 200 con la identidad docente verificada. |
 | `GET /auth/session` | `Access.API`, token ausente, inválido, vencido o sin identidad docente | HTTP 401 con `application/problem+json` y `code: "unauthorized"`. |
+| `GET /courses/{courseId}/access` | `Access.API`, token docente con grant para el curso | HTTP 204 sin contenido. |
+| `GET /courses/{courseId}/access` | `Access.API`, identidad válida sin grant para el curso | HTTP 403 con `application/problem+json` y `code: "course_forbidden"`. |
 
 ## Sesión docente
 
@@ -38,6 +40,24 @@ Ejemplo de respuesta 401:
   "detail": "Se requiere un token válido de una identidad docente confiable."
 }
 ```
+
+## Permisos efectivos por curso
+
+La ruta `GET /courses/{courseId}/access` exige la policy `CourseAccess`. El handler compara el `courseId` de la ruta con los claims `course_access` del JWT ya validado. El proveedor confiable debe emitir un claim `course_access` por cada curso al que el docente tenga acceso efectivo; no se aceptan permisos enviados en encabezados ni en el cuerpo. Si el token es válido pero no contiene el grant exacto para el curso, la respuesta es 403. Si no hay token o su identidad no es válida, se conserva la respuesta 401.
+
+Ejemplo de respuesta 403:
+
+```json
+{
+  "type": "https://httpstatuses.com/403",
+  "title": "Acceso denegado",
+  "status": 403,
+  "code": "course_forbidden",
+  "detail": "La identidad autenticada no tiene permisos efectivos sobre el curso solicitado."
+}
+```
+
+Los permisos del token son la fuente de autorización en esta iteración. El proveedor de identidad debe mantenerlos sincronizados con los permisos efectivos institucionales; la consulta directa a Moodle o a un repositorio de autorizaciones queda pendiente de integrar.
 
 La sonda consulta `HealthCheckService` y solo expresa vida del proceso. No hay verificaciones de Moodle, base de datos u otras dependencias, ni se incluyen detalles internos o secretos en su respuesta. No constituye una comprobación de disponibilidad funcional del MVP.
 

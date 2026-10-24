@@ -14,7 +14,7 @@ Los archivos `.gitkeep` permiten conservar las carpetas vacías en Git. Las vari
 
 | Requisitos | Resultado esperado |
 | --- | --- |
-| RF-01 | Autenticación con roles docente y administrador técnico; acceso solo a cursos y estudiantes autorizados. La validación inicial de identidad docente está implementada; los demás controles de acceso están pendientes. |
+| RF-01 | Autenticación con roles docente y administrador técnico; acceso solo a cursos y estudiantes autorizados. `Access.API` valida identidad docente y aplica grants por curso del token; la integración institucional en tiempo real sigue pendiente. |
 | RF-02 y RF-03 | Configuración segura de la conexión a Moodle y sincronización manual de cursos, matriculados, ítems, notas y estados de actividad según API y permisos disponibles; registro de fecha y errores. |
 | RF-04 | Selección de curso y período, listado de estudiantes, búsqueda y filtros. |
 | RF-05 y RF-06 | Dashboard y ficha individual con promedios de escala explícita, distribución, progreso disponible y evolución; distinción entre nota cero, sin entrega, pendiente de calificación y completado. |

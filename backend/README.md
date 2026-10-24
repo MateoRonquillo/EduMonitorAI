@@ -41,6 +41,8 @@ dotnet run --project backend/src/Services/Access.API --launch-profile http
 
 `Access.API` valida JWT emitidos por un proveedor OpenID Connect confiable. Configura `Identity__Authority` con la URL HTTPS del emisor y `Identity__Audience` con la audiencia de la API antes de llamar `GET /auth/session`. No guardes secretos ni tokens en el repositorio. Un token válido debe estar firmado, vigente, corresponder al emisor y audiencia configurados e incluir `sub`, `teacher_id` y `role: docente`. La ruta responde con la identidad verificada o HTTP 401 Problem Details con `code: unauthorized`.
 
+Para autorizar un curso, el proveedor debe incluir un claim `course_access` por cada curso con acceso efectivo. `GET /courses/{courseId}/access` valida el permiso mediante la policy `CourseAccess`: responde HTTP 204 cuando el ID solicitado coincide con un grant firmado y HTTP 403 Problem Details (`code: course_forbidden`) cuando no coincide. El proveedor debe mantener estos grants alineados con los permisos institucionales; todavía no hay una consulta en tiempo real a Moodle o a una base local.
+
 La API valida sesiones pero no ofrece inicio de sesión, emisión ni renovación de tokens. La definición del contrato y su respuesta de error está en la [documentación de API](../docs/api/README.md).
 
 ```bash
@@ -110,6 +112,6 @@ Las pruebas establecen el entorno por host y deshabilitan redirecciones automát
 
 ## Límites de esta inicialización
 
-No se implementan autorización por curso, sincronización, indicadores, agente, acceso a datos ni Swagger UI. La autenticación se limita a la validación de identidad docente descrita arriba. Las pruebas actuales cubren únicamente el arranque; `UnitTests` y `BuildingBlocks` siguen reservadas sin proyectos.
+No se implementan sincronización, indicadores, agente, acceso a datos ni Swagger UI. La autorización por curso se limita a los grants `course_access` del token; la consulta institucional en tiempo real y las pruebas específicas de permisos quedan pendientes. Las pruebas actuales cubren únicamente el arranque; `UnitTests` y `BuildingBlocks` siguen reservadas sin proyectos.
 
 Estos perfiles son para desarrollo local. Antes de un despliegue deberán configurarse HTTPS, identidad, autorización y las demás medidas de la especificación. No hay despliegue ni infraestructura configurados en este alcance.
