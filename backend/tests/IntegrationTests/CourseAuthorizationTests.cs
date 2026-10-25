@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
@@ -93,7 +94,6 @@ public sealed class CourseAuthorizationTests
                     services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
                     {
                         options.Authority = null;
-                        options.MetadataAddress = null;
                         options.ConfigurationManager = null;
                         options.TokenValidationParameters = new TokenValidationParameters
                         {

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -54,29 +55,27 @@ builder.Services
                 context.HandleResponse();
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 context.Response.ContentType = "application/problem+json";
-
-                await context.Response.WriteAsJsonAsync(new
+                await context.Response.WriteAsync(JsonSerializer.Serialize(new
                 {
                     type = "https://httpstatuses.com/401",
                     title = "No autenticado",
                     status = StatusCodes.Status401Unauthorized,
                     code = "unauthorized",
                     detail = "Se requiere un token válido de una identidad docente confiable."
-                });
+                }), context.HttpContext.RequestAborted);
             },
             OnForbidden = async context =>
             {
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 context.Response.ContentType = "application/problem+json";
-
-                await context.Response.WriteAsJsonAsync(new
+                await context.Response.WriteAsync(JsonSerializer.Serialize(new
                 {
                     type = "https://httpstatuses.com/403",
                     title = "Acceso denegado",
                     status = StatusCodes.Status403Forbidden,
                     code = "course_forbidden",
                     detail = "La identidad autenticada no tiene permisos efectivos sobre el curso solicitado."
-                });
+                }), context.HttpContext.RequestAborted);
             }
         };
     });
