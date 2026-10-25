@@ -302,13 +302,13 @@ app.MapGet("/health", async (HealthCheckService healthChecks, CancellationToken 
 app.Run();
 
 static IResult MoodleError(MoodleServiceException exception) => Results.Problem(
-    statusCode: (int)exception.UpstreamStatus == StatusCodes.StatusServiceUnavailable
+    statusCode: (int)exception.UpstreamStatus == StatusCodes.Status503ServiceUnavailable
         ? StatusCodes.Status503ServiceUnavailable
         : StatusCodes.Status502BadGateway,
-    type: (int)exception.UpstreamStatus == StatusCodes.StatusServiceUnavailable
+    type: (int)exception.UpstreamStatus == StatusCodes.Status503ServiceUnavailable
         ? "https://httpstatuses.com/503"
         : "https://httpstatuses.com/502",
-    title: (int)exception.UpstreamStatus == StatusCodes.StatusServiceUnavailable
+    title: (int)exception.UpstreamStatus == StatusCodes.Status503ServiceUnavailable
         ? "Moodle no está disponible"
         : "Error al consultar Moodle",
     extensions: new Dictionary<string, object?> { ["code"] = exception.ErrorCode });
