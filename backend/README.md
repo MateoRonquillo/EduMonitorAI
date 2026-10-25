@@ -13,6 +13,7 @@ dotnet restore backend/EduMonitorAI.sln
 dotnet build backend/EduMonitorAI.sln --no-restore
 ```
 
+
 Los proyectos utilizan el framework compartido de ASP.NET Core y el paquete oficial `Microsoft.AspNetCore.OpenApi` 10.0.13 para generar la documentación. `MoodleIntegration.API` usa además `Microsoft.AspNetCore.Authentication.JwtBearer` 10.0.13 y el cliente HTTP integrado de .NET. La primera restauración requiere acceso a NuGet o una caché con sus dependencias.
 
 ## Ejecución local
