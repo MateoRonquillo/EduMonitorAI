@@ -8,7 +8,7 @@ Proyecto académico de MVP para cuatro integrantes y seis semanas, basado en `Pr
 
 Actualmente existen la estructura de carpetas, documentación, archivos comunes y una solución con tres hosts ASP.NET Core sobre .NET 10 y pruebas automatizadas de arranque. Cada host expone `GET /health` como comprobación de vida y el documento OpenAPI en `GET /openapi/v1.json` solo en desarrollo. `Access.API` valida tokens de un proveedor OpenID Connect confiable y ofrece `GET /auth/session` para obtener la identidad docente verificada. Aún no hay funcionalidad académica, persistencia, integración ejecutable con Moodle, agente, contenedores ni flujos de CI configurados.
 
-Los archivos `.gitkeep` permiten conservar las carpetas vacías en Git. Las variables de [infra/.env.example](infra/.env.example) son propuestas y aún no son consumidas por una aplicación.
+Los archivos `.gitkeep` permiten conservar las carpetas vacías en Git. MoodleIntegration consume `MOODLE_BASE_URL`, `MOODLE_API_TOKEN`, `IDENTITY_AUTHORITY` e `IDENTITY_AUDIENCE` cuando se proporcionan mediante el entorno; `dotnet run` no carga automáticamente `infra/.env.example`.
 
 ## Alcance del MVP
 

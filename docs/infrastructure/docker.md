@@ -71,7 +71,7 @@ Cada endpoint debe devolver:
 
 `Healthy`
 
-Estas verificaciones únicamente comprueban que las aplicaciones responden. No validan todavía Moodle, persistencia académica ni autorización.
+Estas verificaciones únicamente comprueban que las aplicaciones responden. No validan Moodle, persistencia académica ni permisos de curso.
 
 ## Consultar registros
 
@@ -112,7 +112,7 @@ También se verificó localmente la compilación del backend .NET y la ejecució
 
 ## Limitaciones actuales
 
-- Las APIs todavía no consumen datos reales de Moodle.
+- La API puede consultar cursos y matrículas activas de Moodle, pero esta configuración requiere un servidor, token y proveedor de identidad externos que Compose no aprovisiona.
 - PostgreSQL está preparado, pero los servicios aún no implementan la persistencia académica.
 - Los endpoints de salud no comprueban dependencias externas.
 - La validación de identidad y la policy inicial de permisos por curso se documentan en `docs/api/README.md`; esta configuración de Docker no aprovisiona ni configura un proveedor de identidad.

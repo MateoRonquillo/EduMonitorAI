@@ -1,0 +1,7 @@
+# 0002 - Proteger consultas Moodle con JWT y grants de curso
+
+- Estado: aceptada.
+- Contexto y restricciones: la integración utiliza un token técnico Moodle que puede consultar más de un curso. No existe una base local de permisos ni una consulta institucional de autorización en tiempo real.
+- Decisión: `MoodleIntegration.API` valida JWT mediante un emisor OpenID Connect configurado. Requiere `sub`, `teacher_id` y `role: docente`. El proveedor emite un claim `course_access` por curso con permiso efectivo. `GET /courses` filtra `core_course_get_courses` con esos grants y `GET /courses/{courseId}/participants` exige grant exacto antes de consultar `core_enrol_get_enrolled_users`. El token Moodle se configura fuera del repositorio y se envía en el cuerpo POST.
+- Alternativas consideradas: confiar en el token técnico Moodle para definir el acceso del docente; aceptar el ID de curso enviado por el cliente como autorización; consultar Moodle antes de conocer una identidad autenticada. Se descartan porque el token técnico tiene alcance distinto al docente o no prueban el permiso.
+- Consecuencias y criterios de revisión: los grants deben reflejar los permisos institucionales actuales; un token desactualizado puede conservar acceso revocado hasta expirar. Cuando exista una fuente de permisos en tiempo real, reemplazar la validación por claim y acordar expiración/caché. Las respuestas omiten correo y nombre de usuario Moodle.

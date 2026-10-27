@@ -34,6 +34,10 @@ services:
 
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      Moodle__BaseUrl: ${MOODLE_BASE_URL:-}
+      Moodle__Token: ${MOODLE_API_TOKEN:-}
+      Identity__Authority: ${IDENTITY_AUTHORITY:-}
+      Identity__Audience: ${IDENTITY_AUDIENCE:-}
 
     networks:
       - backend

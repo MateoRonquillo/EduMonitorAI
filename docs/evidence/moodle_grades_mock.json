@@ -14,7 +14,7 @@
       "userid": 202,
       "username": "est.prueba2",
       "grades": [
-        { "itemname": "Examen Parcial 1", "graderaw": null, "status": "ausente" }
+        { "itemname": "Examen Parcial 1", "graderaw": null, "status": "sin_calificar" }
       ]
     },
     {
