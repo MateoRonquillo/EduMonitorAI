@@ -1,6 +1,6 @@
 # Backend de EduMonitorAI
 
-La solución contiene tres proyectos ASP.NET Core sobre .NET 10. Cada proyecto dispone de un punto de entrada en `Program.cs` y una comprobación de vida en `GET /health`. `MoodleIntegration.API` expone consultas protegidas de cursos, participantes, actividades y calificaciones de Moodle.
+La solución contiene tres proyectos ASP.NET Core sobre .NET 10. Cada proyecto dispone de un punto de entrada en `Program.cs` y una comprobación de vida en `GET /health`. `MoodleIntegration.API` expone consultas protegidas de cursos, participantes, actividades y calificaciones de Moodle. `AcademicData.API` normaliza y almacena en PostgreSQL los datos académicos (`POST /courses/{courseId}/sync`, ver [contratos de API](../docs/api/README.md)).
 
 ## Requisitos y compilación
 
@@ -114,3 +114,15 @@ Configura `Identity__Authority` y `Identity__Audience` para validar el JWT, adem
 No se implementan persistencia, sincronización en segundo plano, indicadores, agente ni Swagger UI. El proveedor de identidad y el token Moodle deben configurarse en cada entorno. Las pruebas actuales cubren únicamente el arranque; `UnitTests` y `BuildingBlocks` siguen reservadas sin proyectos.
 
 Estos perfiles son para desarrollo local. Antes de un despliegue deberán configurarse HTTPS, identidad, autorización y las demás medidas de la especificación. No hay despliegue ni infraestructura configurados en este alcance.
+
+## Pruebas
+
+```bash
+dotnet test backend/EduMonitorAI.sln
+```
+
+Las pruebas de `EduMonitorAI.UnitTests` cubren la normalización (CP-5.3 a CP-5.5), el endpoint de sincronización y el error controlado sin base de datos (CP-5.2), y que el cliente de Moodle solo tenga operaciones de lectura (CP-5.10). Las pruebas contra PostgreSQL (CP-5.1, CP-5.6 a CP-5.9) se omiten salvo que se defina `EDUMONITOR_TEST_DB` con la cadena de conexión de una base de pruebas; cada ejecución crea y elimina un esquema temporal propio:
+
+```bash
+EDUMONITOR_TEST_DB="Host=localhost;Port=5432;Database=edutest;Username=<usuario>;Password=<clave>" dotnet test backend/tests/UnitTests/EduMonitorAI.UnitTests
+```
