@@ -21,6 +21,6 @@ Se utilizará la escala sobre 10 puntos (Ponderación UTA: 40% Exámenes, 30% Au
 | Estudiante | Actividad | Estado | Calificación | Notas / Validaciones |
 | :--- | :--- | :--- | :--- | :--- |
 | Est. Prueba 1 | Examen Parcial 1 | Evaluado | 8.5 | Flujo normal. |
-| Est. Prueba 2 | Examen Parcial 1 | Ausente | - | Debe excluirse del promedio, no contar como 0. |
+| Est. Prueba 2 | Examen Parcial 1 | Sin calificación reportada | - | El dato ausente no se convierte en 0; la API no infiere ausencia de entrega sin evidencia de Moodle. |
 | Est. Prueba 3 | Examen Parcial 1 | Evaluado | 0.0 | Cero real, sí afecta el promedio estadístico. |
 | Est. Prueba 1 | Tarea Autónoma 1 | Pendiente | - | Actividad aún no calificada por el docente. |

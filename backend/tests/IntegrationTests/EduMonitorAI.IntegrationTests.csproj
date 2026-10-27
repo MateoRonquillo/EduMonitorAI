@@ -19,6 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="../../../docs/evidence/moodle_grades_mock.json" Link="Fixtures/moodle_grades_mock.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../../docs/evidence/moodle_activities_mock.json" Link="Fixtures/moodle_activities_mock.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../../src/Services/MoodleIntegration.API/MoodleIntegration.API.csproj" Aliases="MoodleApi" />
     <ProjectReference Include="../../src/Services/AcademicData.API/AcademicData.API.csproj" Aliases="AcademicApi" />
     <ProjectReference Include="../../src/Services/Access.API/Access.API.csproj" Aliases="AccessApi" />

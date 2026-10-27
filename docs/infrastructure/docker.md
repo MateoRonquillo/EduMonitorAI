@@ -4,7 +4,7 @@
 
 La infraestructura de EduMonitorAI utiliza Docker Compose para ejecutar los tres servicios ASP.NET Core y una base de datos PostgreSQL de manera conjunta.
 
-Esta configuración corresponde al Sprint 1 y permite comprobar el arranque de los servicios. La integración real con Moodle, la persistencia académica y los controles de autorización se incorporarán posteriormente.
+Esta configuración permite comprobar el arranque de los servicios. `MoodleIntegration.API` incluye consultas protegidas a Moodle, pero para usarlas Compose requiere `MOODLE_BASE_URL`, `MOODLE_API_TOKEN`, `IDENTITY_AUTHORITY` e `IDENTITY_AUDIENCE` en el archivo `.env`; persistencia académica sigue pendiente.
 
 ## Requisitos
 
@@ -71,7 +71,7 @@ Cada endpoint debe devolver:
 
 `Healthy`
 
-Estas verificaciones únicamente comprueban que las aplicaciones responden. No validan todavía Moodle, persistencia académica ni autorización.
+Estas verificaciones únicamente comprueban que las aplicaciones responden. No validan Moodle, persistencia académica ni permisos de curso.
 
 ## Consultar registros
 
@@ -112,10 +112,10 @@ También se verificó localmente la compilación del backend .NET y la ejecució
 
 ## Limitaciones actuales
 
-- Las APIs todavía no consumen datos reales de Moodle.
+- La API puede consultar cursos y matrículas activas de Moodle, pero esta configuración requiere un servidor, token y proveedor de identidad externos que Compose no aprovisiona.
 - PostgreSQL está preparado, pero los servicios aún no implementan la persistencia académica.
 - Los endpoints de salud no comprueban dependencias externas.
-- Los controles de identidad y autorización se desarrollarán en otros Pull Requests.
+- `MoodleIntegration.API` valida identidad docente y grants por curso del token; la frescura de grants depende del proveedor configurado.
 - El workflow de GitHub Actions está configurado localmente, pero requiere validación mediante su ejecución en GitHub.
 
 ## Archivos relacionados
