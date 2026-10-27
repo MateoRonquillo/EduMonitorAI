@@ -8,7 +8,7 @@ La solución contiene tres hosts ASP.NET Core con responsabilidades separadas, u
 | --- | --- |
 | MoodleIntegration.API | Adaptar la comunicación de Moodle REST; validar identidad docente y restringir consultas a grants de curso firmados. |
 | AcademicData.API | Gestionar los datos académicos y sus casos de uso. |
-| Access.API | Gestionar políticas de acceso y la integración con identidad; su implementación funcional sigue pendiente en esta rama. |
+| Access.API | Validar identidad docente mediante JWT de un proveedor OpenID Connect confiable y gestionar las políticas de acceso. |
 
 El frontend consumirá contratos HTTP documentados. Cada servicio debe ser propietario de sus reglas y datos; se evitará acceder directamente a la persistencia de otro servicio.
 
@@ -35,4 +35,4 @@ Las dependencias deben apuntar hacia el dominio y la aplicación. Los detalles d
 
 ## Decisiones pendientes
 
-Se adoptó .NET 10 para los hosts en la [decisión 0001](decisions/0001-inicializacion-aspnet-core.md) y JWT OpenID Connect con grants `course_access` para consultas Moodle en la [decisión 0002](decisions/0002-integracion-moodle-protegida.md). Siguen pendientes versiones y framework del frontend, persistencia, integración funcional de `Access.API`, comunicación entre servicios y estrategia de despliegue. Registrar decisiones aceptadas en `decisions/` antes de introducir componentes que dependan de ellas.
+Se adoptó .NET 10 para los hosts en la [decisión 0001](decisions/0001-inicializacion-aspnet-core.md) y la validación de identidad docente con OpenID Connect en la [decisión 0002](decisions/0002-identidad-docente-openid-connect.md). Siguen pendientes versiones y framework del frontend, persistencia, comunicación entre servicios y estrategia de despliegue. Registrar las decisiones aceptadas en `decisions/` antes de introducir componentes que dependan de ellas.

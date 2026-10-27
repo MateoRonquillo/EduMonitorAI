@@ -1,0 +1,7 @@
+# 0002 - Validar identidad docente con un proveedor OpenID Connect confiable
+
+- Estado: aceptada.
+- Contexto y restricciones: el backend necesita validar una sesión docente antes de exponer datos académicos, pero el proyecto aún no selecciona un proveedor institucional concreto ni emite tokens propios.
+- Decisión: `Access.API` acepta tokens Bearer JWT y valida firma mediante las claves publicadas por el emisor OpenID Connect, emisor, audiencia y vigencia. El proveedor se configura mediante `Identity:Authority` y `Identity:Audience`. Una identidad válida requiere `sub`, `teacher_id` y `role: docente`. `GET /auth/session` devuelve esos identificadores verificados y los claims opcionales `name` y `email`. Una sesión ausente o no válida responde 401 Problem Details con código `unauthorized`.
+- Alternativas consideradas: recibir identificadores de usuario en el cuerpo o confiar en encabezados no firmados; emitir tokens localmente sin integración institucional. Se descartan porque no prueban la identidad con un emisor confiable o exigen gestionar credenciales y ciclos de vida locales.
+- Consecuencias y criterios de revisión: el proveedor debe publicar metadatos y claves de firma accesibles por HTTPS, y emitir los claims acordados. El servicio no emite ni renueva tokens. Revisar el mapeo de rol e identificador cuando se seleccione el proveedor real; los demás servicios deberán validar los mismos tokens antes de exponer datos protegidos.
