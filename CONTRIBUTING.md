@@ -1,5 +1,7 @@
 # Contribuir a EduMonitorAI
 
+Sigue la [estrategia de ramas y convenciones de commits](docs/gitflow.md) para crear ramas, preparar pull requests, revisar cambios y registrar contribuciones.
+
 1. Describe el requisito o problema antes de implementar cambios.
 2. Mantén los cambios centrados en un servicio o responsabilidad.
 3. No agregues credenciales, datos personales ni archivos `.env` al repositorio.
@@ -14,4 +16,4 @@
 - Evita dependencias directas entre implementaciones internas de distintos servicios.
 - Respeta `.editorconfig` y los formateadores del stack cuando se configuren.
 
-Todavía no se han definido comandos de compilación, ejecución ni pruebas: se documentarán al crear los proyectos.
+Los comandos de compilación, ejecución y pruebas están en el [README del backend](backend/README.md). Para cambios en los endpoints técnicos, ejecuta `dotnet test backend/EduMonitorAI.sln --configuration Release`: las pruebas comprueban el arranque de los tres hosts, `/health` y la disponibilidad de OpenAPI según el entorno. Cuando cambies perfiles de ejecución o configuración de red, verifica también el arranque local con los comandos documentados.

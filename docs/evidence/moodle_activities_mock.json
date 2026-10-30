@@ -1,0 +1,23 @@
+{
+  "courseid": 50,
+  "activities": [
+    {
+      "id": 9001,
+      "section": 1,
+      "sectionname": "Unidad 1",
+      "name": "Examen Parcial 1",
+      "module": "quiz",
+      "visible": true,
+      "uservisible": true
+    },
+    {
+      "id": 9002,
+      "section": 2,
+      "sectionname": "Unidad 2",
+      "name": "Tarea Autónoma 1",
+      "module": "assign",
+      "visible": true,
+      "uservisible": true
+    }
+  ]
+}

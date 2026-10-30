@@ -1,0 +1,7 @@
+# 0003 - Exigir grants firmados para autorizar cursos
+
+- Estado: aceptada.
+- Contexto y restricciones: las rutas que operen sobre datos académicos deben limitarse a cursos autorizados. Todavía no existe integración ejecutable con Moodle ni un repositorio local de permisos.
+- Decisión: `Access.API` registra la policy `CourseAccess` y su handler. El handler compara el identificador de curso solicitado en la ruta con cada claim `course_access` del JWT validado. El emisor de identidad confiable debe emitir un grant por curso con acceso efectivo y mantener sus datos actualizados. Una identidad autenticada sin grant recibe HTTP 403 Problem Details (`course_forbidden`); una identidad ausente o inválida conserva HTTP 401 (`unauthorized`).
+- Alternativas consideradas: confiar en un `courseId` enviado por el cliente como prueba de acceso; dejar pasar si no existe una fuente de permisos; consultar Moodle directamente desde el handler. Se descartan porque el identificador no prueba autorización, el acceso por defecto vulneraría el aislamiento, y el adaptador Moodle aún no existe.
+- Consecuencias y criterios de revisión: los endpoints protegidos deben aplicar esta policy; por ahora `GET /courses/{courseId}/access` demuestra la evaluación. La autorización depende de la frescura y exactitud de los grants firmados. Cuando exista Moodle o un repositorio de permisos, mover la decisión a un proveedor de permisos que consulte la fuente institucional y revisar expiración/caché de grants.

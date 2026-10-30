@@ -1,0 +1,60 @@
+name: CI - Validacion del proyecto
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+
+jobs:
+  validar-repositorio:
+    name: Verificar estructura y configuracion
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Verificar estructura base
+        run: |
+          test -f backend/EduMonitorAI.sln
+          test -f infra/.env.example
+          test -f docs/gitflow.md
+          test -d infra/docker
+          test -d infra/compose
+          test -f global.json
+
+      - name: Verificar archivos de entorno
+        run: |
+          archivos=$(git ls-files | grep -E '(^|/)\.env($|\.)' | grep -vE '(^|/)\.env\.example$' || true)
+
+          if [ -n "$archivos" ]; then
+            echo "::error::Se encontraron archivos de entorno versionados"
+            echo "$archivos"
+            exit 1
+          fi
+
+  validar-backend:
+    name: Compilar y probar backend .NET
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restaurar dependencias
+        run: dotnet restore backend/EduMonitorAI.sln
+
+      - name: Compilar solucion
+        run: dotnet build backend/EduMonitorAI.sln --configuration Release --no-restore
+
+      - name: Ejecutar pruebas
+        run: dotnet test backend/EduMonitorAI.sln --configuration Release --no-build
