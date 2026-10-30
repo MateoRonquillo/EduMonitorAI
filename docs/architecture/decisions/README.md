@@ -11,7 +11,6 @@ Crea un archivo `NNNN-titulo.md` por decisión relevante con estas secciones:
 ## Decisiones registradas
 
 - [0001 - Inicializar los puntos de entrada con ASP.NET Core](0001-inicializacion-aspnet-core.md).
-- [0002 - Validar identidad docente con un proveedor OpenID Connect confiable](0002-identidad-docente-openid-connect.md).
-- [0003 - Exigir grants firmados para autorizar cursos](0003-permisos-efectivos-por-curso.md).
+- [0002 - Proteger consultas Moodle con JWT y grants de curso](0002-integracion-moodle-protegida.md).
 
-Las decisiones sobre bases de datos siguen pendientes.
+Las decisiones sobre bases de datos y despliegue del proveedor de identidad siguen pendientes.

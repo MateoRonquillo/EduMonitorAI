@@ -52,8 +52,13 @@ services:
     ports:
       - "127.0.0.1:5102:8080"
 
+    depends_on:
+      postgres:
+        condition: service_healthy
+
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__AcademicDb: Host=postgres;Database=${POSTGRES_DB:?Configurar POSTGRES_DB};Username=${POSTGRES_USER:?Configurar POSTGRES_USER};Password=${POSTGRES_PASSWORD:?Configurar POSTGRES_PASSWORD}
 
     networks:
       - backend

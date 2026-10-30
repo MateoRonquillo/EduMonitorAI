@@ -1,6 +1,6 @@
 # Backend de EduMonitorAI
 
-La solución contiene tres proyectos ASP.NET Core sobre .NET 10. Cada proyecto dispone de un punto de entrada en `Program.cs` y una comprobación de vida en `GET /health`. `MoodleIntegration.API` expone consultas protegidas de cursos, participantes, actividades y calificaciones de Moodle.
+La solución contiene tres proyectos ASP.NET Core sobre .NET 10. Cada proyecto dispone de un punto de entrada en `Program.cs` y una comprobación de vida en `GET /health`. `MoodleIntegration.API` expone consultas protegidas de cursos, participantes, actividades y calificaciones de Moodle. `AcademicData.API` normaliza y almacena en PostgreSQL los datos académicos (`POST /courses/{courseId}/sync`, ver [contratos de API](../docs/api/README.md)).
 
 ## Requisitos y compilación
 
@@ -13,7 +13,8 @@ dotnet restore backend/EduMonitorAI.sln
 dotnet build backend/EduMonitorAI.sln --no-restore
 ```
 
-Los proyectos utilizan el framework compartido de ASP.NET Core y el paquete oficial `Microsoft.AspNetCore.OpenApi` 10.0.13 para generar la documentación. `Access.API` usa además `Microsoft.AspNetCore.Authentication.JwtBearer` 10.0.13. La primera restauración requiere acceso a NuGet o una caché con sus dependencias.
+
+Los proyectos utilizan el framework compartido de ASP.NET Core y el paquete oficial `Microsoft.AspNetCore.OpenApi` 10.0.13 para generar la documentación. `MoodleIntegration.API` usa además `Microsoft.AspNetCore.Authentication.JwtBearer` 10.0.13 y el cliente HTTP integrado de .NET. La primera restauración requiere acceso a NuGet o una caché con sus dependencias.
 
 ## Ejecución local
 
@@ -36,14 +37,6 @@ dotnet run --project backend/src/Services/Access.API --launch-profile http
 | MoodleIntegration.API | `http://localhost:5101/health` |
 | AcademicData.API | `http://localhost:5102/health` |
 | Access.API | `http://localhost:5103/health` |
-
-## Identidad y sesión docente
-
-`Access.API` valida JWT emitidos por un proveedor OpenID Connect confiable. Configura `Identity__Authority` con la URL HTTPS del emisor y `Identity__Audience` con la audiencia de la API antes de llamar `GET /auth/session`. No guardes secretos ni tokens en el repositorio. Un token válido debe estar firmado, vigente, corresponder al emisor y audiencia configurados e incluir `sub`, `teacher_id` y `role: docente`. La ruta responde con la identidad verificada o HTTP 401 Problem Details con `code: unauthorized`.
-
-Para autorizar un curso, el proveedor debe incluir un claim `course_access` por cada curso con acceso efectivo. `GET /courses/{courseId}/access` valida el permiso mediante la policy `CourseAccess`: responde HTTP 204 cuando el ID solicitado coincide con un grant firmado y HTTP 403 Problem Details (`code: course_forbidden`) cuando no coincide. El proveedor debe mantener estos grants alineados con los permisos institucionales; todavía no hay una consulta en tiempo real a Moodle o a una base local.
-
-La API valida sesiones pero no ofrece inicio de sesión, emisión ni renovación de tokens. La definición del contrato y su respuesta de error está en la [documentación de API](../docs/api/README.md).
 
 ```bash
 curl --fail http://localhost:5101/health
@@ -102,12 +95,11 @@ dotnet test backend/tests/IntegrationTests/EduMonitorAI.IntegrationTests.csproj 
 
 El proyecto utiliza xUnit y `Microsoft.AspNetCore.Mvc.Testing` para arrancar los puntos de entrada reales con `WebApplicationFactory` y un servidor HTTP en memoria. No requiere levantar servicios previamente, reservar puertos, configurar secretos ni disponer de Moodle o SQL Server. La primera ejecución restaura las dependencias de pruebas desde NuGet.
 
-Los 22 casos cubren el arranque (seis por servicio) y la autorización por curso en `Access.API` (cuatro escenarios):
+Los 18 casos (seis por servicio) comprueban:
 
 - `/health`: HTTP 200, contenido `text/plain` y cuerpo `Healthy` en Development, Production y Staging.
 - OpenAPI en Development: HTTP 200, JSON válido, operación `GET /health` y respuestas 200/503 en texto plano documentadas.
 - OpenAPI en Production y Staging: HTTP 404.
-- Autorización por curso: docente con grant (204), docente sin grant para ese curso (403 `course_forbidden`), rol de estudiante (401 `unauthorized`) y solicitud sin sesión (401 `unauthorized`). Los JWT de estas pruebas se firman localmente con una clave de prueba; no acceden a un proveedor externo.
 
 Las pruebas establecen el entorno por host y deshabilitan redirecciones automáticas para comprobar las respuestas originales. Los hosts y clientes se liberan al terminar cada caso. Estas pruebas validan el arranque y los contratos técnicos; no prueban sockets de Kestrel, TLS, perfiles locales ni dependencias externas. Los escenarios de estados de salud degradado o fallido quedan fuera de estas pruebas básicas.
 
@@ -119,6 +111,18 @@ Configura `Identity__Authority` y `Identity__Audience` para validar el JWT, adem
 
 ## Límites actuales
 
-No se implementan sincronización, indicadores, agente, acceso a datos ni Swagger UI. La autorización por curso se limita a los grants `course_access` del token; la consulta institucional en tiempo real queda pendiente. Las pruebas unitarias de dominio y `BuildingBlocks` siguen reservadas sin proyectos.
+No se implementan persistencia, sincronización en segundo plano, indicadores, agente ni Swagger UI. El proveedor de identidad y el token Moodle deben configurarse en cada entorno. Las pruebas actuales cubren únicamente el arranque; `UnitTests` y `BuildingBlocks` siguen reservadas sin proyectos.
 
 Estos perfiles son para desarrollo local. Antes de un despliegue deberán configurarse HTTPS, identidad, autorización y las demás medidas de la especificación. No hay despliegue ni infraestructura configurados en este alcance.
+
+## Pruebas
+
+```bash
+dotnet test backend/EduMonitorAI.sln
+```
+
+Las pruebas de `EduMonitorAI.UnitTests` cubren la normalización (CP-5.3 a CP-5.5), el endpoint de sincronización y el error controlado sin base de datos (CP-5.2), y que el cliente de Moodle solo tenga operaciones de lectura (CP-5.10). Las pruebas contra PostgreSQL (CP-5.1, CP-5.6 a CP-5.9) se omiten salvo que se defina `EDUMONITOR_TEST_DB` con la cadena de conexión de una base de pruebas; cada ejecución crea y elimina un esquema temporal propio:
+
+```bash
+EDUMONITOR_TEST_DB="Host=localhost;Port=5432;Database=edutest;Username=<usuario>;Password=<clave>" dotnet test backend/tests/UnitTests/EduMonitorAI.UnitTests
+```
