@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using EduMonitorAI.Integration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 
@@ -100,9 +101,12 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddHealthChecks();
+builder.Services.AddIntegration();
+builder.Services.AddScoped<MoodleIntegration.API.Application.CourseReader>();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+app.UseApiErrors();
 
 if (app.Environment.IsDevelopment())
 {
@@ -299,6 +303,11 @@ app.MapGet("/health", async (HealthCheckService healthChecks, CancellationToken 
     .Produces<string>(StatusCodes.Status200OK, "text/plain")
     .Produces<string>(StatusCodes.Status503ServiceUnavailable, "text/plain");
 
+app.MapGet("/api/courses", async (HttpContext context, MoodleClient moodle, CancellationToken ct) =>
+ Results.Ok((await moodle.Authorize(context.Token(), null, ct)).Courses));
+app.MapGet("/api/courses/{courseId:long}/snapshot", async (long courseId, HttpContext context,
+ MoodleIntegration.API.Application.CourseReader reader, CancellationToken ct) =>
+ Results.Ok(await reader.Read(context.Token(), courseId, ct)));
 app.Run();
 
 static IResult MoodleError(MoodleServiceException exception) => Results.Problem(
