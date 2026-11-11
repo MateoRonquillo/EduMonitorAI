@@ -74,6 +74,33 @@ services:
     networks:
       - backend
 
+  moodle_app:
+    image: bitnamilegacy/moodle:latest
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    environment:
+      - MOODLE_DATABASE_HOST=moodle_db
+      - MOODLE_DATABASE_USER=moodle_user
+      - MOODLE_DATABASE_PASSWORD=EduMonitor2026_db!
+      - MOODLE_DATABASE_NAME=moodle_db
+      - MOODLE_USERNAME=admin
+      - MOODLE_PASSWORD=EduMonitor2026!
+    depends_on:
+      - moodle_db
+    networks:
+      - backend
+
+  moodle_db:
+    image: mariadb:10.11
+    environment:
+      - MARIADB_ROOT_PASSWORD=EduMonitor2026_root!
+      - MARIADB_USER=moodle_user
+      - MARIADB_PASSWORD=EduMonitor2026_db!
+      - MARIADB_DATABASE=moodle_db
+    networks:
+      - backend
+
 volumes:
   postgres_data:
 
