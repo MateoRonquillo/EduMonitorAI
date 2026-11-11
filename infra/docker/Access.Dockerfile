@@ -4,6 +4,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 COPY global.json ./
+COPY backend/src/BuildingBlocks/ backend/src/BuildingBlocks/
 COPY backend/src/Services/Access.API/Access.API.csproj backend/src/Services/Access.API/
 
 RUN dotnet restore backend/src/Services/Access.API/Access.API.csproj
@@ -17,6 +18,7 @@ RUN dotnet publish backend/src/Services/Access.API/Access.API.csproj \
 
 # Etapa de ejecucion
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

@@ -5,6 +5,7 @@ WORKDIR /src
 
 # Copiar archivos necesarios para restaurar dependencias
 COPY global.json ./
+COPY backend/src/BuildingBlocks/ backend/src/BuildingBlocks/
 COPY backend/src/Services/MoodleIntegration.API/MoodleIntegration.API.csproj backend/src/Services/MoodleIntegration.API/
 
 RUN dotnet restore backend/src/Services/MoodleIntegration.API/MoodleIntegration.API.csproj
@@ -20,6 +21,7 @@ RUN dotnet publish backend/src/Services/MoodleIntegration.API/MoodleIntegration.
 
 # Etapa 2: ejecutar con ASP.NET Core Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
