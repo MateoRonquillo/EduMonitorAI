@@ -118,6 +118,19 @@ También se verificó localmente la compilación del backend .NET y la ejecució
 - La validación de identidad y la policy inicial de permisos por curso se documentan en `docs/api/README.md`; esta configuración de Docker no aprovisiona ni configura un proveedor de identidad.
 - El workflow de GitHub Actions está configurado localmente, pero requiere validación mediante su ejecución en GitHub.
 
+## Laboratorio Moodle aislado
+
+Cuando estén integrados el Dockerfile y los scripts de la entrega de Moodle, el archivo `infra/compose/compose.moodle-lab.yml` permitirá arrancar el laboratorio como proyecto independiente. Usa MySQL 8.4 con volúmenes propios y ejecuta instancias de laboratorio de MoodleIntegration.API y Access.API. El proyecto habitual sigue usando su propio Compose, con Bitnami Moodle, MariaDB, PostgreSQL y sus APIs.
+
+Desde la raíz del repositorio, crea `infra/compose/.env.moodle-lab` con contraseñas locales para `MYSQL_ROOT_PASSWORD`, `MOODLE_DB_PASSWORD`, `MOODLE_ADMIN_PASSWORD`, `MOODLE_LAB_PASSWORD`, `MOODLE_TEACHER_PASSWORD` y `MOODLE_STUDENT_PASSWORD`. Git ignora ese archivo. Usa el nombre de proyecto indicado para mantener separados los contenedores, las imágenes, la red y los volúmenes.
+
+```bash
+docker compose -p edumonitorai-moodle-lab --env-file infra/compose/.env.moodle-lab -f infra/compose/compose.moodle-lab.yml config --quiet
+docker compose -p edumonitorai-moodle-lab --env-file infra/compose/.env.moodle-lab -f infra/compose/compose.moodle-lab.yml up -d --build
+```
+
+El laboratorio publica Moodle en `http://localhost:8081`, MoodleIntegration.API en `http://localhost:5111` y Access.API en `http://localhost:5113`. Comprueba `/health.php` en Moodle y `/health` en las APIs. Para detener el laboratorio y conservar sus datos, usa `stop` con las mismas opciones de proyecto y archivo.
+
 ## Archivos relacionados
 
 - `infra/compose/compose.yml`: configuración de los contenedores.

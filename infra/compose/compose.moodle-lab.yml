@@ -1,0 +1,76 @@
+name: edumonitorai-moodle-lab
+
+services:
+  moodle-db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Configurar MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: moodle
+      MYSQL_USER: moodle
+      MYSQL_PASSWORD: ${MOODLE_DB_PASSWORD:?Configurar MOODLE_DB_PASSWORD}
+    volumes:
+      - moodle_db:/var/lib/mysql
+    healthcheck:
+      test: [CMD-SHELL, 'MYSQL_PWD="$$MYSQL_PASSWORD" mysql -h 127.0.0.1 -u moodle -D moodle -e "SELECT 1"']
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  moodle:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Moodle.Dockerfile
+    ports:
+      - "127.0.0.1:8081:80"
+    environment:
+      MOODLE_WWWROOT: http://localhost:8081
+      MOODLE_DB_PASSWORD: ${MOODLE_DB_PASSWORD:?Configurar MOODLE_DB_PASSWORD}
+      MOODLE_ADMIN_PASSWORD: ${MOODLE_ADMIN_PASSWORD:?Configurar MOODLE_ADMIN_PASSWORD}
+      MOODLE_LAB_PASSWORD: ${MOODLE_LAB_PASSWORD:?Configurar MOODLE_LAB_PASSWORD}
+      MOODLE_TEACHER_PASSWORD: ${MOODLE_TEACHER_PASSWORD:?Configurar MOODLE_TEACHER_PASSWORD}
+      MOODLE_STUDENT_PASSWORD: ${MOODLE_STUDENT_PASSWORD:?Configurar MOODLE_STUDENT_PASSWORD}
+    volumes:
+      - moodle_data:/var/www/moodledata
+      - moodle_config:/var/www/html/config-volume
+    depends_on:
+      moodle-db:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD-SHELL, "test -f /var/www/moodledata/.edumonitor-ready && curl --fail --silent --header 'Host: localhost:8081' http://127.0.0.1/health.php | grep -qx Healthy"]
+      interval: 15s
+      timeout: 10s
+      start_period: 180s
+      retries: 20
+
+  moodle-integration:
+    build:
+      context: ../..
+      dockerfile: infra/docker/MoodleIntegration.Dockerfile
+    ports:
+      - "127.0.0.1:5111:8080"
+    environment:
+      Moodle__BaseUrl: http://moodle
+      Moodle__AllowHttp: "true"
+      Moodle__HostHeader: localhost:8081
+    depends_on:
+      moodle:
+        condition: service_healthy
+
+  access:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Access.Dockerfile
+    ports:
+      - "127.0.0.1:5113:8080"
+    environment:
+      Moodle__BaseUrl: http://moodle
+      Moodle__AllowHttp: "true"
+      Moodle__HostHeader: localhost:8081
+    depends_on:
+      moodle:
+        condition: service_healthy
+
+volumes:
+  moodle_db:
+  moodle_data:
+  moodle_config:
