@@ -1,32 +1,13 @@
-# Configuración del Laboratorio Moodle - EduMonitor AI
+# Laboratorio Moodle
 
-Este documento detalla la instalación, dependencias y configuración reproducible de la instancia Moodle de laboratorio para validación local.
+Consultar [la guía completa](../requirements/sprint1.md) para el primer arranque y los usuarios ficticios. El entorno usa Moodle 5.0.3, PHP 8.3 y MySQL 8.4.
 
-## 1. Dependencias y Entorno
-* **Plataforma:** Docker y Docker Compose (recomendado para entorno reproducible).
-* **Servidor Web:** Apache o Nginx (incluido en la imagen oficial de Moodle).
-* **PHP:** Versión 8.0 o superior.
-* **Base de Datos:** PostgreSQL o MariaDB de prueba (estrictamente sin datos de producción).
+`infra/moodle/bootstrap.php` crea seis cursos, doce estudiantes y dos docentes. `docente` tiene acceso a PROGRAMACION, BASES-DATOS, MATEMATICA, REDES e INGENIERIA-SOFTWARE; `otrodocente` conserva CURSO-RESTRINGIDO para comprobar los rechazos de acceso. Se crean cuatro unidades, dos parciales y actividades assign en las categorías Exámenes (40%), Autónomo (30%) y APEs (30%). Cada parcial pesa 50% de la nota del curso. El máximo está fijado en 10 para actividades, categorías, parciales y nota final del curso.
 
-## 2. Configuración Reproducible (PR-11)
-Para inicializar el laboratorio sin exponer secretos:
-1. Se utilizará un archivo `docker-compose.yml` base (ubicado en `infra/`) para levantar los contenedores de base de datos y Moodle.
-2. Queda estrictamente prohibido subir credenciales reales, tokens o respaldos con datos personales de la universidad al repositorio.
+PROGRAMACION es el único escenario de bajo rendimiento; conserva ceros válidos, notas ausentes y los cuatro estados del Sprint 2. Los demás cursos tienen notas de actividades entre 7,2 y 9,9. La semilla actualiza los valores ficticios administrados en cada arranque, incluidas las actividades ya existentes; conserva usuarios, matrículas, identificadores y tokens. Utilizarla solo en este laboratorio, pues vuelve a aplicar estas notas de demostración.
 
-## 3. Configuración de Servicios Web (PR-13)
-Para que la API .NET consuma los datos académicos de forma segura, se debe configurar Moodle de la siguiente manera:
-* **Habilitar Servicios Web:** Navegar a *Administración del sitio > Características avanzadas* y habilitar la opción.
-* **Protocolo:** Habilitar el protocolo REST.
-* **Privilegios del Token Técnico:** Crear un rol específico con acceso mínimo (principio de menor privilegio) únicamente a las siguientes funciones de la API externa:
-  * `core_course_get_courses`
-  * `core_enrol_get_enrolled_users`
-  * `core_course_get_contents`
-  * `gradereport_user_get_grade_items`
-* **Matrículas activas:** La integración envía `onlyactive=1` al consultar participantes. El token técnico debe tener las capacidades Moodle requeridas por esta opción, en particular `moodle/course:enrolreview` en los cursos consultados.
-* **Contenido y calificaciones:** El servicio necesita permiso para ver el contenido del curso y el reporte de calificaciones de los cursos consultados. Configura las capacidades Moodle correspondientes al reporte de usuario y a la vista de calificaciones; valida el acceso efectivo con el rol técnico en la versión instalada.
+Después de reconstruir Moodle, volver a iniciar sesión para cargar los nuevos cursos y sincronizar sus datos. `scripts/verify-demo-courses.ps1 -TeacherPassword (Read-Host 'Contraseña docente' -AsSecureString)` comprueba los cinco cursos, escalas, notas y alertas, y actualiza sus copias académicas.
 
-## 4. Configuración de MoodleIntegration.API
+El complemento local edumonitor publica el servicio `edumonitor` con funciones de lectura. La semilla activa REST y permite usar el protocolo a usuarios autenticados; las funciones siguen aplicando permisos Moodle. Los estudiantes pueden obtener un token pero no acceder a las APIs EduMonitor. En una institución, el administrador debe revisar la instalación y reducir los usuarios habilitados del servicio según sus políticas.
 
-La API utiliza `Moodle__BaseUrl` (por ejemplo, `https://moodle.example.org`) y `Moodle__Token`. El token se envía por POST al endpoint `/webservice/rest/server.php`; no se guarda en código ni se coloca en la URL. Para desarrollo local, copia las variables de [`infra/.env.example`](../../infra/.env.example) a `infra/compose/.env`; el Compose las pasa al contenedor `moodle-integration`.
-
-También se requiere `Identity__Authority` y `Identity__Audience`. El proveedor debe emitir tokens firmados con `sub`, `teacher_id`, `role: docente` y un claim `course_access` por cada curso permitido. Los endpoints de actividades y calificaciones validan el grant antes de consultar Moodle; el de calificaciones limita usuarios a matrículas activas. Consulta el contrato en la [documentación de API](../api/README.md).
+La contraseña del administrador y de los usuarios de laboratorio procede del archivo local de entorno. La semilla no imprime tokens y las APIs no escriben notas. Verificar visualmente categorías, actividades y pesos en el libro de calificaciones antes de declarar aceptada HU-01.
