@@ -103,7 +103,7 @@ app.Run();
 public partial class Program { }
 
 
-
+// Snapshot record type
 
 
 
