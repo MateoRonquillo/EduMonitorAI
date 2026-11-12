@@ -27,6 +27,7 @@
     <ProjectReference Include="../../src/Services/MoodleIntegration.API/MoodleIntegration.API.csproj" Aliases="MoodleApi" />
     <ProjectReference Include="../../src/Services/AcademicData.API/AcademicData.API.csproj" Aliases="AcademicApi" />
     <ProjectReference Include="../../src/Services/Access.API/Access.API.csproj" Aliases="AccessApi" />
+    <ProjectReference Include="../../src/Services/Agent.API/Agent.API.csproj" Aliases="AgentApi" />
   </ItemGroup>
 
 </Project>
